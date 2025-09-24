@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load custom_filter %}
+{% load static %}
+
+{% block title %}
+Create Course
+{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+        {% block content %}
+        <main class="p-6 max-w-3xl mx-auto">
+            <h1 class="text-3xl font-bold text-orange-500 mb-6">Create New Course</h1>
+            {% if error %}
+                <h1 class='text-red-400'>fucking error: {{error}}</h1>
+            {% endif %}
+
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+
+                <!-- Course Info -->
+                <div class="space-y-4 border p-4 rounded-md shadow-sm">
+                    <h2 class="text-xl font-semibold text-gray-700">Course Information</h2>
+                    <div class="border rounded-md p-4 mb-4 bg-orange-50">
+                        <div>
+                            <label for="{{ cform.course_code.label }}" class="block text-sm font-medium text-gray-700">Course code</label>
+                            {{ cform.course_code }}
+                        </div>
+    
+                        <div>
+                            <label for="{{ cform.course_name.label }}" class="block text-sm font-medium text-gray-700">Course name</label>
+                            {{ cform.course_name }}
+                        </div>
+    
+                        <div>
+                            <label
+                                for="{{ cform.credits.label }}"
+                                class="block text-sm font-medium text-gray-700">Credits</label>
+                            {{ cform.credits }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Info -->
+                 {% if error %}
+                    <h1 class='text-red-400'>fucking error: {{error}}</h1>
+                {% endif %}
+                <h1 class='text-red-400'>{{ sform.non_field_errors }}</h1>
+                
+                <div class="space-y-4 border p-4 rounded-md shadow-sm">
+                    <h2 class="text-xl font-semibold text-gray-700">Section Information</h2>
+                    {% comment %} {{  }} {% for form in section_formset %} {% endcomment %}
+                    <div class="border rounded-md p-4 mb-4 bg-orange-50">
+                        <div>
+                            <label for="{{ sform.section_number.label }}" class="block text-sm font-medium text-gray-700">Section number</label>
+                            {{ sform.section_number }}
+                        </div>
+
+                        <div>
+                            <label for="{{ sform.semester.label }}" class="block text-sm font-medium text-gray-700">Semester</label>
+                            {{ sform.semester }}
+                        </div>
+
+                        <div>
+                            <label
+                                for="{{ sform.professor.label }}"
+                                class="block text-sm font-medium text-gray-700">Professor</label>
+                            {{ sform.professor }}
+                        </div>
+
+                        <div>
+                            <label
+                                for="{{ sform.day_of_week.label }}"
+                                class="block text-sm font-medium text-gray-700">Day of week</label>
+                            {{ sform.day_of_week }}
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="{{ sform.start_time.label }}" class="block text-sm font-medium text-gray-700">Start time</label>
+                                {{ sform.start_time }}
+                            </div>
+                            <div>
+                                <label
+                                    for="{{ sform.end_time.label }}"
+                                    class="block text-sm font-medium text-gray-700">End time</label>
+                                {{ sform.end_time }}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label
+                                for="{{ sform.capacity.label }}"
+                                class="block text-sm font-medium text-gray-700">Capacity</label>
+                            <h1 class='text-red-400'>{{sform.capacity.errors}}</h1>
+                            {{ sform.capacity }}
+                        </div>
+                    </div>
+                    {% comment %} {% endfor %} {% endcomment %}
+                </div>
+
+                <button
+                    type="submit"
+                    class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-2 rounded-md">
+                    Save
+                </button>
+            </form>
+        </main>
+        {% endblock %}
+

@@ -1,0 +1,28 @@
+{% load custom_filter %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}  {% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+
+  <body class="bg-white text-gray-800">
+    {% block nav %} {% include 'nav.html' %} {% endblock %}
+
+    <main class="p-6 max-w-8xl mx-auto">
+      <section class="mb-6 flex sm:flex-row flex-col gap-4 justify-between">
+        {% block head %}  {% endblock %}
+      </section>
+
+      <div class="overflow-x-auto bg-white rounded-lg shadow border border-orange-100">
+        {% block content %}  {% endblock %}
+      </div>
+    </main>
+
+    {% block script %}  {% endblock %}
+  </body>
+</html>

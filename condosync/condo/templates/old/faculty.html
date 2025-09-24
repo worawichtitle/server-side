@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load custom_filter %}
+{% load static %}
+
+{% block title %} Faculty Dashboard {% endblock %}
+
+  <body class="bg-white text-gray-800">
+    {% include 'nav.html' %}
+
+    <main class="p-6 max-w-8xl mx-auto">
+      <section class="mb-6 flex sm:flex-row flex-col gap-4 justify-between">
+        {% block head %} 
+          <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-3xl font-bold text-orange-500">Faculty Dashboard</h1>
+            <p class="text-gray-500">
+              Total <span class="font-medium text-blue-500">{{total}}</span> Faculties
+            </p>
+          </div>
+        </div>
+        <section aria-label="Filter content" class="sm:self-end sm:place-items-end flex flex-col gap-y-2">
+          <label class="text-2xl font-medium" for="search">Quick Search</label>
+          <input 
+          class="block w-[300px] rounded-md field-sizing-content border-[1px] px-4 py-2" 
+          id="search" 
+          type="text" 
+          placeholder="Search faculties..." 
+          autocomplete="search" value="{{search}}" 
+          title="Filter data" />
+        </section>
+        {% endblock %}
+      </section>
+
+      <div class="overflow-x-auto bg-white rounded-lg shadow border border-orange-100">
+        {% block content %} 
+          <table class="min-w-full divide-y divide-orange-100">
+          <thead class="bg-orange-100 text-left text-sm font-semibold text-gray-700">
+            <tr>
+              <th class="px-4 py-3">ID</th>
+              <th class="px-4 py-3">Name</th>
+              <th class="px-4 py-3">Professors</th>
+              <th class="px-4 py-3">Students</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 text-sm">
+            {% for faculty in faculty_list %}
+              <tr class="hover:bg-orange-50 transition {% cycle '' 'bg-gray-100' %}">
+                <td class="px-4 py-3">{{ faculty.id }}</td>
+                <td class="px-4 py-3 font-medium">{{ faculty.name }}</td>
+                <td class="px-4 py-3">{{ faculty.professor_set.count }} People</td>
+                <td class="px-4 py-3">{{ faculty.student_set.count }} People</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="4" class="text-center text-gray-400 px-4 py-6">No faculty found.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% endblock %}
+        
+      </div>
+    </main>
+
+    {% block script %} <script src="{% static 'faculty.js' %}"></script> {% endblock %}
+  </body>
+</html>
