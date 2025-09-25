@@ -6,8 +6,10 @@ from django.views import View
 from condo.forms import *
 from condo.models import *
 from django.db.models import Q
+from django.db import transaction
 
 # Create your views here.
+# -----------USER--------------------------------
 class user_login(View):
     def get(self, request, **thisiserror):
         form = LoginForm(request.POST)
@@ -29,8 +31,57 @@ class user_login(View):
 
 class user_home(View):
     def get(self, request):
-        return redirect("user-home")
+        username = request.session.get("username", "Guest")
+        return render(request, 'home_user.html', {"username": username})
+        # return render(request, 'home_user.html')
 
+class user_regis(View):
+    def get(self, request, **thisiserror):
+        form = UserForm(request.POST)
+        context = {
+            'form': form,
+        }
+        context.update(thisiserror)
+        return render(request, 'regis_user.html', context)
+    def post(self, request):
+        form = UserForm(request.POST)
+        try:
+            with transaction.atomic():
+                if form.is_valid():
+                    form.save()
+                    return redirect('user-login')
+                else:
+                    raise transaction.TransactionManagementError("Error")
+        except Exception as e:
+                context = {
+                    'form': form,
+                }
+                return render(request, 'regis_user.html', context)
+
+
+# -----------STAFF------------------------------------------------
+class staff_login(View):
+    def get(self, request, **thisiserror):
+        form = StaffLoginForm(request.POST)
+        context = {
+            'form': form
+        }
+        context.update(thisiserror)
+        return render(request, 'login_staff.html', context)
+    def post(self, request):
+        form = StaffLoginForm(request.POST)
+        if form.is_valid():
+            staff = form.staff
+            request.session["staff_id"] = staff.id
+            request.session["username"] = staff.username
+            return redirect("staff-home")
+        else:
+            print("Form error:", form.errors)
+            return self.get(request, error=form.errors)
+
+class staff_home(View):
+    def get(self, request):
+        return render(request, 'home_staff.html')
 
 
 

@@ -1,6 +1,6 @@
 from django import template
 
-condoapp = template.Library()
+register = template.Library()
 
 def sortSectionByDayOfWeek(sections):
     for section in sections:
@@ -14,5 +14,5 @@ def formatPhoneNumber(value):
         number = value
     return number
 
-condoapp.filter("sortSectionByDayOfWeek", sortSectionByDayOfWeek)
-condoapp.filter("formatPhoneNumber", formatPhoneNumber)
+register.filter("sortSectionByDayOfWeek", sortSectionByDayOfWeek)
+register.filter("formatPhoneNumber", formatPhoneNumber)

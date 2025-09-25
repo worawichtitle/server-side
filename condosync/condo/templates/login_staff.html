@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% comment %} {% load custom_filter %} {% endcomment %}
+{% load static %}
+
+{% block title %}
+Create Course
+{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+        {% block content %}
+        <main class="p-6 max-w-3xl mx-auto">
+            <h1 class="text-3xl font-bold text-orange-500 mb-6">Login</h1>
+            {% comment %} {% if error %}
+                <h1 class='text-red-400'>{{error}}</h1>
+            {% endif %} {% endcomment %}
+
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+
+                <h1 class='text-red-400'>{{ form.non_field_errors }}</h1>
+                <div class="space-y-4 border p-4 rounded-md shadow-sm">
+                    <h2 class="text-xl font-semibold text-gray-700">Login</h2>
+                    <div class="border rounded-md p-4 mb-4 bg-orange-50">
+                        <div>
+                            <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700">Username/Email</label>
+                            {{ form.username }}
+                        </div>
+    
+                        <div>
+                            <label for="{{ form.password_hash.id_for_label }}" class="block text-sm font-medium text-gray-700">Password</label>
+                            {{ form.password_hash }}
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-2 rounded-md">
+                    Login
+                </button>
+            </form>
+        </main>
+        {% endblock %}
+

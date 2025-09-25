@@ -6,9 +6,17 @@ from condo.views import *
 urlpatterns = [
     # ex: /condo/login/  or  {% url 'user-login' %}
     path("login/", views.user_login.as_view(), name="user-login"),
+    # ex: /condo/regis/  or  {% url 'user-regis' %}
+    path("regis/", views.user_regis.as_view(), name="user-regis"),
     # ex: /condo/home/  or  {% url 'user-login' %}
-    path("home/", views.user_home.as_view(), name="user-home")
+    path("home/", views.user_home.as_view(), name="user-home"),
+    
 
+    # ------STAFF----------------
+    # ex: /condo/login/  or  {% url 'user-login' %}
+    path("login_staff/", views.staff_login.as_view(), name="staff-login"),
+    # ex: /condo/home/  or  {% url 'user-login' %}
+    path("home_staff/", views.staff_home.as_view(), name="staff-home"),
     # # ex: /registration/professor/
     # path("professor/", views.professor_list.as_view(), name="professor-list"),
     # # ex: /registration/faculty/
