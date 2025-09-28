@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 {% load custom_filter %}
+{% load static %}
 
 {% block title %}
-Create Student
+Register User
 {% endblock %}
 
 {% block head %}
@@ -10,7 +11,10 @@ Create Student
 
 {% block content %}
   <div class="p-6 max-w-3xl mx-auto">
-    <h1 class="text-3xl font-bold text-orange-500 mb-2">Sign up USER</h1>
+    <div class="flex items-center justify-between mb-2">
+      <h1 class="text-3xl font-bold text-orange-500">Sign up USER</h1>
+      <a href="{% url 'user-login' %}" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600">Login</a>
+    </div>
     <p class="text-gray-400 mb-6">กรอกข้อมูลของคุณเพื่อการซื้อขายเร็วขึ้น</p>
     {% if error %}
       <h1 class='text-red-400'>error: {{error}}</h1>
@@ -29,15 +33,17 @@ Create Student
       </div>
 
       <div class="grid sm:grid-cols-2 gap-4 form-control">
-        <div>
+        <div class="relative">
           <label for="{{ form.password_hash.id_for_label }}" class="block text-sm font-medium text-gray-700">Password</label>
           <h1 class='text-red-400'>{{ form.password_hash.errors }}</h1>
           {{ form.password_hash }}
+          <button type="button" class="absolute right-2 top-9 text-xs px-2 py-1 bg-gray-200 rounded show-password-btn" onclick="showPassword(event, 'password_hash')">Show</button>
         </div>
-        <div>
+        <div class="relative">
           <label for="{{ form.confirm_password.id_for_label }}" class="block text-sm font-medium text-gray-700">Confirm Password</label>
           <h1 class='text-red-400'>{{ form.confirm_password.errors }}</h1>
           {{ form.confirm_password }}
+          <button type="button" class="absolute right-2 top-9 text-xs px-2 py-1 bg-gray-200 rounded show-password-btn" onclick="showPassword(event, 'confirm_password')">Show</button>
         </div>
       </div>
 
@@ -89,19 +95,4 @@ Create Student
     </form>
   </div>
   {% block script %} <script src="{% static 'showpassword.js' %}"></script> {% endblock %}
-  {% comment %} {% block script %}
-    <script>
-      function togglePassword() {
-        const input = document.getElementById("password");
-        const button = event.target;
-        if (input.type === "password") {
-          input.type = "text";
-          button.textContent = "Hide";
-        } else {
-          input.type = "password";
-          button.textContent = "Show";
-        }
-      }
-    </script>
-  {% endblock %} {% endcomment %}
 {% endblock %}

@@ -1,6 +1,6 @@
 console.log("showpassword.js loaded");
-function showPassword(event) {
-  const input = document.getElementById("password_hash");
+function showPassword(event, inputId) {
+  const input = document.getElementById(inputId);
   const button = event.target;
   if (input.type === "password") {
     input.type = "text";

@@ -8,15 +8,21 @@ urlpatterns = [
     path("login/", views.user_login.as_view(), name="user-login"),
     # ex: /condo/regis/  or  {% url 'user-regis' %}
     path("regis/", views.user_regis.as_view(), name="user-regis"),
+    # ex: /condo/forgetpw/  or  {% url 'user-forgetpw' %}
+    path("forgetpw/", views.user_forgetpw.as_view(), name="user-forgetpw"),
     # ex: /condo/home/  or  {% url 'user-login' %}
     path("home/", views.user_home.as_view(), name="user-home"),
     
 
     # ------STAFF----------------
-    # ex: /condo/login/  or  {% url 'user-login' %}
+    # ex: /condo/login_staff/  or  {% url 'staff-login' %}
     path("login_staff/", views.staff_login.as_view(), name="staff-login"),
-    # ex: /condo/home/  or  {% url 'user-login' %}
+    # ex: /condo/home_staff/  or  {% url 'staff-login' %}
     path("home_staff/", views.staff_home.as_view(), name="staff-home"),
+    # ex: /condo/regis_staff/  or  {% url 'staff-regis' %}
+    path("regis_staff/", views.staff_regis.as_view(), name="staff-regis"),
+    # ex: /condo/forgetpw/  or  {% url 'staff-forgetpw' %}
+    path("forgetpw_staff/", views.staff_forgetpw.as_view(), name="staff-forgetpw"),
     # # ex: /registration/professor/
     # path("professor/", views.professor_list.as_view(), name="professor-list"),
     # # ex: /registration/faculty/

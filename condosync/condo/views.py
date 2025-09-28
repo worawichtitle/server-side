@@ -57,7 +57,32 @@ class user_regis(View):
                     'form': form,
                 }
                 return render(request, 'regis_user.html', context)
-
+        
+class user_forgetpw(View):
+    def get(self, request, **thisiserror):
+        form = ForgetPWForm(request.POST)
+        context = {
+            'form': form,
+        }
+        context.update(thisiserror)
+        return render(request, 'forgetpw_user.html', context)
+    def post(self, request):
+        form = ForgetPWForm(request.POST)
+        try:
+            with transaction.atomic():
+                if form.is_valid():
+                    user = form.user
+                    user.password_hash = form.cleaned_data["password_hash"]
+                    user.save()
+                    # print("form User:", user.id, user.username)
+                    return redirect('user-login')
+                else:
+                    raise transaction.TransactionManagementError("Error")
+        except Exception as e:
+                context = {
+                    'form': form,
+                }
+                return render(request, 'forgetpw_user.html', context)
 
 # -----------STAFF------------------------------------------------
 class staff_login(View):
@@ -81,9 +106,58 @@ class staff_login(View):
 
 class staff_home(View):
     def get(self, request):
-        return render(request, 'home_staff.html')
+        username = request.session.get("username", "Guest")
+        return render(request, 'home_staff.html', {"username": username})
+    
+class staff_regis(View):
+    def get(self, request, **thisiserror):
+        form = StaffForm(request.POST)
+        context = {
+            'form': form,
+        }
+        context.update(thisiserror)
+        return render(request, 'regis_staff.html', context)
+    def post(self, request):
+        form = StaffForm(request.POST)
+        try:
+            with transaction.atomic():
+                if form.is_valid():
+                    form.save()
+                    return redirect('staff-login')
+                else:
+                    raise transaction.TransactionManagementError("Error")
+        except Exception as e:
+                print("try error:", e)
+                context = {
+                    'form': form,
+                }
+                return render(request, 'regis_staff.html', context)
 
-
+class staff_forgetpw(View):
+    def get(self, request, **thisiserror):
+        form = StaffForgetPWForm(request.POST)
+        context = {
+            'form': form,
+        }
+        context.update(thisiserror)
+        return render(request, 'forgetpw_staff.html', context)
+    def post(self, request):
+        form = StaffForgetPWForm(request.POST)
+        try:
+            with transaction.atomic():
+                if form.is_valid():
+                    user = form.user
+                    user.password_hash = form.cleaned_data["password_hash"]
+                    user.save()
+                    # print("form User:", user.id, user.username)
+                    return redirect('staff-login')
+                else:
+                    raise transaction.TransactionManagementError("Error")
+        except Exception as e:
+                context = {
+                    'form': form,
+                }
+                return render(request, 'forgetpw_staff.html', context)
 
 # class create_course(View):
 #     def get(self, request, **thisiserror):
