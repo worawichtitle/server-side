@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load custom_filter %}
+{% load static %}
+
+{% block title %}
+Update Staff
+{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+  <div class="p-6 max-w-3xl mx-auto">
+    <div class="flex items-center justify-between mb-2">
+      <h1 class="text-3xl font-bold text-orange-500">แก้ไขข้อมูลพนักงาน</h1>
+
+    </div>
+    <p class="text-gray-400 mb-6">กรอกข้อมูลของคุณสำหรับการใช้งาน</p>
+    {% if error %}
+      <h1 class='text-red-400'>error: {{error}}</h1>
+    {% endif %}
+
+    <!-- ตรง action แก้เป็น url ของตัวเองด้วย -->
+    <form method="post" action="" class="space-y-5 bg-white p-6 rounded-xl border border-orange-100 shadow" enctype="multipart/form-data">
+      {% csrf_token %}
+      <h1 class='text-red-400'>{{ form.non_field_errors }}</h1>
+      <div class="form-control">
+        <div>
+          <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700">ชื่อผู้ใช้</label>
+          <h1 class='text-red-400'>{{ form.username.errors }}</h1>
+          {{ form.username }}
+        </div>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4 form-control">
+        <div>
+          <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700">ชื่อจริง</label>
+          <h1 class='text-red-400'>{{ form.first_name.errors }}</h1>
+          {{ form.first_name }}
+        </div>
+        <div>
+          <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700">นามสกุล</label>
+          <h1 class='text-red-400'>{{ form.last_name.errors }}</h1>
+          {{ form.last_name }}
+        </div>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4 form-control">
+        <div>
+          <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700">อีเมล</label>
+           <h1 class='text-red-400'>{{form.email.errors}}</h1> {% comment %} แสดง error ของ email {% endcomment %}
+          {{ form.email }}
+        </div>
+        <div>
+          <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-gray-700">เบอร์โทรศัพท์</label>
+          <h1 class='text-red-400'>{{form.phone.errors}}</h1>
+          {{ form.phone }}
+        </div>
+      </div>
+      <div class="form-control">
+        <div>
+          <label for="{{ form.role.id_for_label }}" class="block text-sm font-medium text-gray-700">ตำแหน่งงาน</label>
+          <h1 class='text-red-400'>{{form.role.errors}}</h1>
+          {{ form.role }}
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <a href="{% url 'staff-profile' staff.id %}" class="px-4 py-2 rounded-lg border">ยกเลิก</a>
+        <button type="submit" class="px-5 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600">ยืนยัน</button>
+      </div>
+    </form>
+  </div>
+  {% block script %}  {% endblock %}
+{% endblock %}

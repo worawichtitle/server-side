@@ -21,7 +21,9 @@ class user_login(View):
     def post(self, request):
         form = LoginForm(request.POST)
         if form.is_valid():
+            request.session.flush()
             user = form.user
+            request.session.set_expiry(21600)  # 6 hours in seconds
             request.session["user_id"] = user.id
             request.session["username"] = user.username
             return redirect("user-home")
@@ -31,8 +33,13 @@ class user_login(View):
 
 class user_home(View):
     def get(self, request):
-        username = request.session.get("username", "Guest")
-        return render(request, 'home_user.html', {"username": username})
+        if not request.session.get("user_id"):
+            return redirect("user-login")
+        context = {
+            'username': request.session.get("username"),
+            'user_id': request.session.get("user_id")
+        }
+        return render(request, 'home_user.html', context)
         # return render(request, 'home_user.html')
 
 class user_regis(View):
@@ -83,6 +90,59 @@ class user_forgetpw(View):
                     'form': form,
                 }
                 return render(request, 'forgetpw_user.html', context)
+        
+class user_profile(View):
+    def get(self, request, user_id):
+        if request.session.get("staff_id"):
+            pass
+        elif request.session.get("user_id") != user_id:
+            if  not request.session.get("user_id"):
+                return redirect("user-login")
+            return redirect("user-home")
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return redirect("user-login")
+        context = {
+            'user_id': user_id,
+            'user': user
+        }
+        return render(request, 'profile_user.html', context)
+    
+class user_update(View):
+    def get(self, request, user_id, **thisiserror):
+        if not request.session.get("user_id"):
+            return redirect("user-login")
+        if request.session.get("user_id") != user_id:
+            return redirect("user-home")
+        user = User.objects.get(pk=user_id)
+        print(user.id)
+        form = UserUpdateForm(instance=user)
+        context = {
+            'form': form,
+            'user_id': user_id,
+            'user': user,
+        }
+        context.update(thisiserror)
+        return render(request, 'update_user.html', context)
+    def post(self, request, user_id):
+        user = User.objects.get(pk=user_id)
+        form = UserUpdateForm(request.POST, instance=user)
+        try:
+            with transaction.atomic():
+                if form.is_valid():
+                    user = form.save()
+                    return redirect('user-profile', user_id)
+                else:
+                    raise transaction.TransactionManagementError("Error")
+        except Exception as e:
+                print("try error:", e)
+                context = {
+                    'form': form,
+                    'user_id': user_id,
+                    'user': user,
+                }
+                return render(request, 'update_user.html', context)
 
 # -----------STAFF------------------------------------------------
 class staff_login(View):
@@ -96,7 +156,9 @@ class staff_login(View):
     def post(self, request):
         form = StaffLoginForm(request.POST)
         if form.is_valid():
+            request.session.flush()
             staff = form.staff
+            request.session.set_expiry(21600)  # 6 hours in seconds
             request.session["staff_id"] = staff.id
             request.session["username"] = staff.username
             return redirect("staff-home")
@@ -106,8 +168,13 @@ class staff_login(View):
 
 class staff_home(View):
     def get(self, request):
-        username = request.session.get("username", "Guest")
-        return render(request, 'home_staff.html', {"username": username})
+        if not request.session.get("staff_id"):
+            return redirect("staff-login")
+        context = {
+            'username': request.session.get("username"),
+            'staff_id': request.session.get("staff_id")
+        }
+        return render(request, 'home_staff.html', context)
     
 class staff_regis(View):
     def get(self, request, **thisiserror):
@@ -158,39 +225,57 @@ class staff_forgetpw(View):
                     'form': form,
                 }
                 return render(request, 'forgetpw_staff.html', context)
+        
+class staff_profile(View):
+    def get(self, request, staff_id):
+        if not request.session.get("staff_id"):
+            return redirect("staff-login")
+        if request.session.get("staff_id") != staff_id:
+            return redirect("staff-home")
+        try:
+            staff = Staff.objects.get(pk=staff_id)
+        except Staff.DoesNotExist:
+            return redirect("staff-login")
+        context = {
+            'staff_id': staff_id,
+            'staff': staff
+        }
+        return render(request, 'profile_staff.html', context)
 
-# class create_course(View):
-#     def get(self, request, **thisiserror):
-#         cform = CourseForm(request.POST)
-#         sform = SectionForm(request.POST)
-#         context = {
-#             'cform': cform,
-#             'sform': sform,
-#         }
-#         context.update(thisiserror)
-#         return render(request, 'create_course.html', context)
-#     def post(self, request):
-#         cform = CourseForm(request.POST)
-#         sform = SectionForm(request.POST)
-#         if cform.is_valid() and sform.is_valid():
-#             try:
-#                 course = cform.save()
-#                 section = sform.save(commit=False)
-#                 section.course = course
-#                 section.save()
-#                 return redirect('course-list')
-#             except Exception as e:
-#                 context = {
-#                     'cform': cform,
-#                     'sform': sform
-#                 }
-#                 print("cform", cform.errors)
-#                 print("sform", sform.errors)
-#                 return render(request, 'create_course.html', context, error=e)
-#         else:
-#             print("cform", cform.errors)
-#             print("sform", sform.errors)
-#             return self.get(request, error=cform.errors)
+class staff_update(View):
+    def get(self, request, staff_id, **thisiserror):
+        if not request.session.get("staff_id"):
+            return redirect("staff-login")
+        if request.session.get("staff_id") != staff_id:
+            return redirect("staff-home")
+        staff = Staff.objects.get(pk=staff_id)
+        print(staff.id)
+        form = StaffUpdateForm(instance=staff)
+        context = {
+            'form': form,
+            'staff_id': staff_id,
+            'staff': staff,
+        }
+        context.update(thisiserror)
+        return render(request, 'update_staff.html', context)
+    def post(self, request, staff_id):
+        staff = Staff.objects.get(pk=staff_id)
+        form = StaffUpdateForm(request.POST, instance=staff)
+        try:
+            with transaction.atomic():
+                if form.is_valid():
+                    staff = form.save()
+                    return redirect('staff-profile', staff_id)
+                else:
+                    raise transaction.TransactionManagementError("Error")
+        except Exception as e:
+                print("try error:", e)
+                context = {
+                    'form': form,
+                    'staff_id': staff_id,
+                    'staff': staff,
+                }
+                return render(request, 'update_staff.html', context)
         
 # class update_course(View):
 #     def get(self, request, course_code, **thisiserror):

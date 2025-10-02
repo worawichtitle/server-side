@@ -92,6 +92,25 @@ class ForgetPWForm(ModelForm):
         cleaned_data["password_hash"] = hashlib.sha256(password.encode()).hexdigest()
         self.user = user
         return cleaned_data
+    
+class UserUpdateForm(ModelForm):
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name',
+                  'email', 'phone', 'main_contact', 'address']
+        widgets = {
+            'address': forms.Textarea(attrs={'rows': 3}),
+        }
+    def clean_username(self):
+        data = self.cleaned_data["username"]
+        if User.objects.filter(username=data).exclude(pk=self.instance.pk).exists():
+            raise ValidationError("This username is already in use")
+        return data
+    def clean_email(self):
+        data = self.cleaned_data["email"]
+        if User.objects.filter(email=data).exclude(pk=self.instance.pk).exists():
+            raise ValidationError("This email is already in use")
+        return data
 
 # -----------Staff----------------------------
 class StaffForm(ModelForm):
@@ -179,3 +198,22 @@ class StaffForgetPWForm(ModelForm):
         cleaned_data["password_hash"] = hashlib.sha256(password.encode()).hexdigest()
         self.user = user
         return cleaned_data
+    
+class StaffUpdateForm(ModelForm):
+    class Meta:
+        model = Staff
+        fields = ['username', 'first_name', 'last_name',
+                  'email', 'phone', 'role']
+        widgets = {
+            'role': forms.Select(),
+        }
+    def clean_username(self):
+        data = self.cleaned_data["username"]
+        if Staff.objects.filter(username=data).exclude(pk=self.instance.pk).exists():
+            raise ValidationError("This username is already in use")
+        return data
+    def clean_email(self):
+        data = self.cleaned_data["email"]
+        if Staff.objects.filter(email=data).exclude(pk=self.instance.pk).exists():
+            raise ValidationError("This email is already in use")
+        return data

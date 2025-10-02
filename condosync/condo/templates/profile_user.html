@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load custom_filter %}
+{% load static %}
+
+{% block title %}
+Staff Profile
+{% endblock %}
+
+{% block head %}
+  <a href="{% url 'user-home' %}" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600">Back</a>
+{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-3xl mx-auto">
+  <h1 class="text-3xl font-bold text-orange-500 mb-4">User Profile ID: {{user_id}}</h1>
+  <div class="bg-white p-6 rounded-xl border border-orange-100 shadow space-y-4">
+    <div class="flex justify-between">
+      <span class="font-semibold text-gray-700">Username</span>
+      <span class="text-gray-900">{{ user.username }}</span>
+    </div>
+    <hr>
+    <div class="flex justify-between">
+      <span class="font-semibold text-gray-700">First Name</span>
+      <span class="text-gray-900">{{ user.first_name }}</span>
+    </div>
+    <hr>
+    <div class="flex justify-between">
+      <span class="font-semibold text-gray-700">Last Name</span>
+      <span class="text-gray-900">{{ user.last_name }}</span>
+    </div>
+    <hr>
+    <div class="flex justify-between">
+      <span class="font-semibold text-gray-700">Email</span>
+      <span class="text-gray-900">{{ user.email }}</span>
+    </div>
+    <hr>
+    <div class="flex justify-between">
+      <span class="font-semibold text-gray-700">Phone</span>
+      <span class="text-gray-900">{{ user.phone }}</span>
+    </div>
+    <hr>
+    <div class="flex justify-between">
+      <span class="font-semibold text-gray-700">Main Contact</span>
+      <span class="text-gray-900">{{ user.main_contact }}</span>
+    </div>
+    <hr>
+    <div class="form-control">
+      <div>
+        <p class="font-semibold text-gray-700">Address</p>
+        <p class="text-gray-900">{{ user.address }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex items-center justify-end gap-3 pt-2">
+    <a href="{% url 'user-update' user.id %}" class="px-5 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600">Edit</a>
+  </div>
+</div>
+{% endblock %}
