@@ -6,19 +6,19 @@ from django.core.exceptions import ValidationError
 import hashlib
 # -----------USER-----------------------------------
 class UserForm(ModelForm):
-    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'confirm_password'}),
-                                        label="Confirm Password")
+    # confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'confirm_password'}),
+    #                                     label="Confirm Password")
     class Meta:
         model = User
-        fields = ['username', 'password_hash', 'first_name', 'last_name',
+        fields = ['username', 'first_name', 'last_name',
                   'email', 'phone', 'main_contact', 'address']
         widgets = {
-            'password_hash': forms.PasswordInput(attrs={'id': 'password_hash'}),
+            # 'password_hash': forms.PasswordInput(attrs={'id': 'password_hash'}),
             'address': forms.Textarea(attrs={'rows': 3}),
         }
     def clean_username(self):
         data = self.cleaned_data["username"]
-        if User.objects.filter(username=data).exists():
+        if User.objects.filter(username=data).exclude(pk=self.instance.pk).exists():
             raise ValidationError("This username is already in use")
         return data
     def clean_email(self):
@@ -26,18 +26,74 @@ class UserForm(ModelForm):
         if User.objects.filter(email=data).exclude(pk=self.instance.pk).exists():
             raise ValidationError("This email is already in use")
         return data
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     password = cleaned_data.get("password_hash")
+    #     # confirm = cleaned_data.get("confirm_password")
+    #     confirm = self.cleaned_data.get("confirm_password")
+    #     if not password or not confirm:
+    #         raise ValidationError("Both password and confirm password are required.")
+    #     if password != confirm:
+    #         raise ValidationError("Passwords do not match")
+
+    #     # Hash the password before saving
+    #     cleaned_data["password_hash"] = hashlib.sha256(password.encode()).hexdigest()
+    #     return cleaned_data
+
+class PWForm(ModelForm):
+    # username = forms.CharField(label="Username or Email")
+    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'confirm_password'}),
+                                        label="Confirm Password")
+    class Meta:
+        model = User
+        fields = ['password_hash']
+        widgets = {
+            'password_hash': forms.PasswordInput(attrs={'id': 'password_hash'}),
+        }
     def clean(self):
         cleaned_data = super().clean()
         password = cleaned_data.get("password_hash")
-        # confirm = cleaned_data.get("confirm_password")
         confirm = self.cleaned_data.get("confirm_password")
         if not password or not confirm:
             raise ValidationError("Both password and confirm password are required.")
         if password != confirm:
             raise ValidationError("Passwords do not match")
+        # Hash the password before saving
+        cleaned_data["password_hash"] = hashlib.sha256(password.encode()).hexdigest()
+        return cleaned_data
+    
+class ChangePWForm(ModelForm):
+    password_old = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'password_old'}),
+                                        label="Old Password")
+    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'confirm_password'}),
+                                        label="Confirm Password")
+    class Meta:
+        model = User
+        fields = ['password_hash']
+        widgets = {
+            'password_hash': forms.PasswordInput(attrs={'id': 'password_hash'}),
+        }
+    def __init__(self, *args, **kwargs):
+        self.user_instance = kwargs.pop('instance', None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        old = cleaned_data.get("password_old")
+        password = cleaned_data.get("password_hash")
+        confirm = cleaned_data.get("confirm_password")
+        if not old:
+            raise ValidationError("Current password is required.")
+        if self.user_instance.password_hash != hashlib.sha256(old.encode()).hexdigest():
+            raise ValidationError("Current password is incorrect.")
+        if not password or not confirm:
+            raise ValidationError("Both password and confirm password are required.")
+        if password != confirm:
+            raise ValidationError("New passwords do not match")
 
         # Hash the password before saving
         cleaned_data["password_hash"] = hashlib.sha256(password.encode()).hexdigest()
+        # self.user = user
         return cleaned_data
 
 
@@ -61,56 +117,6 @@ class LoginForm(forms.Form):
             raise ValidationError("Incorrect username or password.")
         self.user = user
         return cleaned_data
-
-class ForgetPWForm(ModelForm):
-    username = forms.CharField(label="Username or Email")
-    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'confirm_password'}),
-                                        label="Confirm Password")
-    class Meta:
-        model = User
-        fields = ['password_hash']
-        widgets = {
-            'password_hash': forms.PasswordInput(attrs={'id': 'password_hash'}),
-        }
-    def clean(self):
-        cleaned_data = super().clean()
-        userinput = cleaned_data.get("username")
-        password = cleaned_data.get("password_hash")
-        confirm = self.cleaned_data.get("confirm_password")
-        user = User.objects.filter(username=userinput).first()
-        if not user:
-            user = User.objects.filter(email=userinput).first()
-        if not user:
-            raise ValidationError("User not found.")
-        
-        if not password or not confirm:
-            raise ValidationError("Both password and confirm password are required.")
-        if password != confirm:
-            raise ValidationError("Passwords do not match")
-
-        # Hash the password before saving
-        cleaned_data["password_hash"] = hashlib.sha256(password.encode()).hexdigest()
-        self.user = user
-        return cleaned_data
-    
-class UserUpdateForm(ModelForm):
-    class Meta:
-        model = User
-        fields = ['username', 'first_name', 'last_name',
-                  'email', 'phone', 'main_contact', 'address']
-        widgets = {
-            'address': forms.Textarea(attrs={'rows': 3}),
-        }
-    def clean_username(self):
-        data = self.cleaned_data["username"]
-        if User.objects.filter(username=data).exclude(pk=self.instance.pk).exists():
-            raise ValidationError("This username is already in use")
-        return data
-    def clean_email(self):
-        data = self.cleaned_data["email"]
-        if User.objects.filter(email=data).exclude(pk=self.instance.pk).exists():
-            raise ValidationError("This email is already in use")
-        return data
 
 # -----------Staff----------------------------
 class StaffForm(ModelForm):

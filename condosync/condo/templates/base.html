@@ -22,7 +22,11 @@
 
   <body>
     {% block nav %}
-      {% comment %} {% include 'nav.html' %} {% endcomment %}
+      {% if request.session.staff_id%}
+        {% include 'nav_staff.html' %}
+      {% elif request.session.user_id %}
+        {% include 'nav_user.html' %}
+      {% endif %}
     {% endblock %}
 
     <section class="p-6 max-w-8xl mx-auto">

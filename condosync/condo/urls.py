@@ -8,9 +8,9 @@ urlpatterns = [
     path("login/", views.user_login.as_view(), name="user-login"),
     # ex: /condo/regis/  or  {% url 'user-regis' %}
     path("regis/", views.user_regis.as_view(), name="user-regis"),
-    # ex: /condo/forgetpw/  or  {% url 'user-forgetpw' %}
-    path("forgetpw/", views.user_forgetpw.as_view(), name="user-forgetpw"),
-    # ex: /condo/home/  or  {% url 'user-login' %}
+    # ex: /condo/changepw/1/  or  {% url 'user-changepw' user_id %}
+    path("changepw/<int:user_id>/", views.user_changepw.as_view(), name="user-changepw"),
+    # ex: /condo/home/  or  {% url 'user-home' %}
     path("home/", views.user_home.as_view(), name="user-home"),
      # ex: /condo/profile_user/1/  or  {% url 'user-profile' user_id %}
     path("profile_user/<int:user_id>/", views.user_profile.as_view(), name="user-profile"),

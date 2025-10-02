@@ -6,6 +6,9 @@
 Login User
 {% endblock %}
 
+{% block nav %}
+{% endblock %}
+
 {% block head %}
 {% endblock %}
 
@@ -39,9 +42,9 @@ Login User
 
 
                 </div>
-                <a href="{% url 'user-forgetpw' %}" class="text-sm text-blue-600 hover:underline">
+                {% comment %} <a href="{% url 'user-forgetpw' %}" class="text-sm text-blue-600 hover:underline">
                     Forgot your password?
-                </a>
+                </a> {% endcomment %}
             </div>
 
 

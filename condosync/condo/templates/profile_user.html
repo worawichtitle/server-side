@@ -3,7 +3,7 @@
 {% load static %}
 
 {% block title %}
-Staff Profile
+User Profile
 {% endblock %}
 
 {% block head %}
@@ -52,8 +52,11 @@ Staff Profile
     </div>
   </div>
 
+  {% if request.session.user_id == user_id %}
   <div class="flex items-center justify-end gap-3 pt-2">
+    <a href="{% url 'user-changepw' user.id %}" class="px-5 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600">Change Password</a>
     <a href="{% url 'user-update' user.id %}" class="px-5 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600">Edit</a>
   </div>
+  {% endif %}
 </div>
 {% endblock %}

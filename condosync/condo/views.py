@@ -35,61 +35,85 @@ class user_home(View):
     def get(self, request):
         if not request.session.get("user_id"):
             return redirect("user-login")
+        try:
+            user_id = request.session.get("user_id")
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return redirect("user-login")
         context = {
-            'username': request.session.get("username"),
-            'user_id': request.session.get("user_id")
+            'user_id': user_id,
+            'user': user
         }
         return render(request, 'home_user.html', context)
-        # return render(request, 'home_user.html')
 
 class user_regis(View):
     def get(self, request, **thisiserror):
         form = UserForm(request.POST)
+        pwform = PWForm(request.POST)
         context = {
             'form': form,
+            'pwform': pwform,
         }
         context.update(thisiserror)
         return render(request, 'regis_user.html', context)
     def post(self, request):
         form = UserForm(request.POST)
+        pwform = PWForm(request.POST)
         try:
             with transaction.atomic():
                 if form.is_valid():
-                    form.save()
+                    print('form pass')
+                    form_instance = form.save(commit=False)
+                    if pwform.is_valid():
+                        print('PWform pass', pwform.cleaned_data["password_hash"])
+                        form_instance.password_hash = pwform.cleaned_data["password_hash"]
+                        form_instance.save()
                     return redirect('user-login')
                 else:
+                    print('Transaction ERROR')
                     raise transaction.TransactionManagementError("Error")
         except Exception as e:
+                print("other error:", e)
                 context = {
                     'form': form,
+                    'pwform': pwform,
                 }
                 return render(request, 'regis_user.html', context)
-        
-class user_forgetpw(View):
-    def get(self, request, **thisiserror):
-        form = ForgetPWForm(request.POST)
+
+class user_changepw(View):
+    def get(self, request, user_id, **thisiserror):
+        if not request.session.get("user_id"):
+            return redirect("user-login")
+        if request.session.get("user_id") != user_id:
+            return redirect("user-home")
+        user = User.objects.get(pk=user_id)
+        form = ChangePWForm(request.POST, instance=user)
         context = {
             'form': form,
+            'user_id': user_id,
+            'user': user,
         }
         context.update(thisiserror)
-        return render(request, 'forgetpw_user.html', context)
-    def post(self, request):
-        form = ForgetPWForm(request.POST)
+        return render(request, 'changepw_user.html', context)
+    def post(self, request, user_id):
+        user = User.objects.get(pk=user_id)
+        form = ChangePWForm(request.POST, instance=user)
         try:
             with transaction.atomic():
                 if form.is_valid():
-                    user = form.user
                     user.password_hash = form.cleaned_data["password_hash"]
                     user.save()
                     # print("form User:", user.id, user.username)
-                    return redirect('user-login')
+                    return redirect('user-profile', user_id)
                 else:
                     raise transaction.TransactionManagementError("Error")
         except Exception as e:
                 context = {
                     'form': form,
+                    'user_id': user_id,
+                    'user': user
                 }
-                return render(request, 'forgetpw_user.html', context)
+                return render(request, 'changepw_user.html', context)
         
 class user_profile(View):
     def get(self, request, user_id):
@@ -117,7 +141,7 @@ class user_update(View):
             return redirect("user-home")
         user = User.objects.get(pk=user_id)
         print(user.id)
-        form = UserUpdateForm(instance=user)
+        form = UserForm(instance=user)
         context = {
             'form': form,
             'user_id': user_id,
@@ -127,7 +151,7 @@ class user_update(View):
         return render(request, 'update_user.html', context)
     def post(self, request, user_id):
         user = User.objects.get(pk=user_id)
-        form = UserUpdateForm(request.POST, instance=user)
+        form = UserForm(request.POST, instance=user)
         try:
             with transaction.atomic():
                 if form.is_valid():
@@ -143,6 +167,40 @@ class user_update(View):
                     'user': user,
                 }
                 return render(request, 'update_user.html', context)
+        
+# class user_regis(View):
+#     def get(self, request, **thisiserror):
+#         form = UserForm(request.POST)
+#         pwform = PWForm(request.POST)
+#         context = {
+#             'form': form,
+#             'pwform': pwform,
+#         }
+#         context.update(thisiserror)
+#         return render(request, 'regis_user.html', context)
+#     def post(self, request):
+#         form = UserForm(request.POST)
+#         pwform = PWForm(request.POST)
+#         try:
+#             with transaction.atomic():
+#                 if form.is_valid():
+#                     print('form pass')
+#                     form_instance = form.save(commit=False)
+#                     if pwform.is_valid():
+#                         print('PWform pass', pwform.cleaned_data["password_hash"])
+#                         form_instance.password_hash = pwform.cleaned_data["password_hash"]
+#                         form_instance.save()
+#                     return redirect('user-login')
+#                 else:
+#                     print('Transaction ERROR')
+#                     raise transaction.TransactionManagementError("Error")
+#         except Exception as e:
+#                 print("other error:", e)
+#                 context = {
+#                     'form': form,
+#                     'pwform': pwform,
+#                 }
+#                 return render(request, 'regis_user.html', context)
 
 # -----------STAFF------------------------------------------------
 class staff_login(View):
@@ -170,11 +228,35 @@ class staff_home(View):
     def get(self, request):
         if not request.session.get("staff_id"):
             return redirect("staff-login")
+        try:
+            staff_id = request.session.get("staff_id")
+            staff = Staff.objects.get(pk=staff_id)
+        except Staff.DoesNotExist:
+            return redirect("staff-login")
         context = {
-            'username': request.session.get("username"),
-            'staff_id': request.session.get("staff_id")
+            'staff_id': staff_id,
+            'staff': staff
         }
+        # context = {
+        #     'username': request.session.get("username"),
+        #     'staff_id': request.session.get("staff_id")
+        # }
         return render(request, 'home_staff.html', context)
+    
+# class user_home(View):
+#     def get(self, request):
+#         if not request.session.get("user_id"):
+#             return redirect("user-login")
+#         try:
+#             user_id = request.session.get("user_id")
+#             user = User.objects.get(pk=user_id)
+#         except User.DoesNotExist:
+#             return redirect("user-login")
+#         context = {
+#             'user_id': user_id,
+#             'user': user
+#         }
+#         return render(request, 'home_user.html', context)
     
 class staff_regis(View):
     def get(self, request, **thisiserror):
