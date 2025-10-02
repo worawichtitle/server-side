@@ -61,13 +61,12 @@ class user_regis(View):
         pwform = PWForm(request.POST)
         try:
             with transaction.atomic():
-                if form.is_valid():
+                if form.is_valid() and pwform.is_valid():
                     print('form pass')
                     form_instance = form.save(commit=False)
-                    if pwform.is_valid():
-                        print('PWform pass', pwform.cleaned_data["password_hash"])
-                        form_instance.password_hash = pwform.cleaned_data["password_hash"]
-                        form_instance.save()
+                    print('PWform pass', pwform.cleaned_data["password_hash"])
+                    form_instance.password_hash = pwform.cleaned_data["password_hash"]
+                    form_instance.save()
                     return redirect('user-login')
                 else:
                     print('Transaction ERROR')
@@ -126,6 +125,8 @@ class user_profile(View):
         try:
             user = User.objects.get(pk=user_id)
         except User.DoesNotExist:
+            if request.session.get("staff_id"):
+                return redirect("staff-home")
             return redirect("user-login")
         context = {
             'user_id': user_id,
@@ -168,39 +169,17 @@ class user_update(View):
                 }
                 return render(request, 'update_user.html', context)
         
-# class user_regis(View):
-#     def get(self, request, **thisiserror):
-#         form = UserForm(request.POST)
-#         pwform = PWForm(request.POST)
-#         context = {
-#             'form': form,
-#             'pwform': pwform,
-#         }
-#         context.update(thisiserror)
-#         return render(request, 'regis_user.html', context)
-#     def post(self, request):
-#         form = UserForm(request.POST)
-#         pwform = PWForm(request.POST)
-#         try:
-#             with transaction.atomic():
-#                 if form.is_valid():
-#                     print('form pass')
-#                     form_instance = form.save(commit=False)
-#                     if pwform.is_valid():
-#                         print('PWform pass', pwform.cleaned_data["password_hash"])
-#                         form_instance.password_hash = pwform.cleaned_data["password_hash"]
-#                         form_instance.save()
-#                     return redirect('user-login')
-#                 else:
-#                     print('Transaction ERROR')
-#                     raise transaction.TransactionManagementError("Error")
-#         except Exception as e:
-#                 print("other error:", e)
-#                 context = {
-#                     'form': form,
-#                     'pwform': pwform,
-#                 }
-#                 return render(request, 'regis_user.html', context)
+
+class logout(View):
+    def get(self, request):
+        # Clear session keys
+        staff = False
+        if request.session.get('staff_id'):
+            staff = True
+        request.session.flush()  # Clears all session data
+        if staff:
+            return redirect('staff-login') 
+        return redirect('user-login') 
 
 # -----------STAFF------------------------------------------------
 class staff_login(View):
@@ -243,35 +222,26 @@ class staff_home(View):
         # }
         return render(request, 'home_staff.html', context)
     
-# class user_home(View):
-#     def get(self, request):
-#         if not request.session.get("user_id"):
-#             return redirect("user-login")
-#         try:
-#             user_id = request.session.get("user_id")
-#             user = User.objects.get(pk=user_id)
-#         except User.DoesNotExist:
-#             return redirect("user-login")
-#         context = {
-#             'user_id': user_id,
-#             'user': user
-#         }
-#         return render(request, 'home_user.html', context)
-    
 class staff_regis(View):
     def get(self, request, **thisiserror):
         form = StaffForm(request.POST)
+        pwform = StaffPWForm(request.POST)
         context = {
             'form': form,
+            'pwform': pwform,
         }
         context.update(thisiserror)
         return render(request, 'regis_staff.html', context)
     def post(self, request):
         form = StaffForm(request.POST)
+        pwform = StaffPWForm(request.POST)
         try:
             with transaction.atomic():
-                if form.is_valid():
-                    form.save()
+                if form.is_valid() and pwform.is_valid():
+                    form_instance = form.save(commit=False)
+                    print('PWform pass', pwform.cleaned_data["password_hash"])
+                    form_instance.password_hash = pwform.cleaned_data["password_hash"]
+                    form_instance.save()
                     return redirect('staff-login')
                 else:
                     raise transaction.TransactionManagementError("Error")
@@ -279,34 +249,44 @@ class staff_regis(View):
                 print("try error:", e)
                 context = {
                     'form': form,
+                    'pwform': pwform,
                 }
                 return render(request, 'regis_staff.html', context)
-
-class staff_forgetpw(View):
-    def get(self, request, **thisiserror):
-        form = StaffForgetPWForm(request.POST)
+        
+class staff_changepw(View):
+    def get(self, request, staff_id, **thisiserror):
+        if not request.session.get("staff_id"):
+            return redirect("staff-login")
+        if request.session.get("staff_id") != staff_id:
+            return redirect("staff-home")
+        staff = Staff.objects.get(pk=staff_id)
+        form = StaffChangePWForm(request.POST, instance=staff)
         context = {
             'form': form,
+            'staff_id': staff_id,
+            'staff': staff,
         }
         context.update(thisiserror)
-        return render(request, 'forgetpw_staff.html', context)
-    def post(self, request):
-        form = StaffForgetPWForm(request.POST)
+        return render(request, 'changepw_staff.html', context)
+    def post(self, request, staff_id):
+        staff = Staff.objects.get(pk=staff_id)
+        form = StaffChangePWForm(request.POST, instance=staff)
         try:
             with transaction.atomic():
                 if form.is_valid():
-                    user = form.user
-                    user.password_hash = form.cleaned_data["password_hash"]
-                    user.save()
-                    # print("form User:", user.id, user.username)
-                    return redirect('staff-login')
+                    staff.password_hash = form.cleaned_data["password_hash"]
+                    staff.save()
+                    # print("form User:", staff.id, staff.staffname)
+                    return redirect('staff-profile', staff_id)
                 else:
                     raise transaction.TransactionManagementError("Error")
         except Exception as e:
                 context = {
                     'form': form,
+                    'staff_id': staff_id,
+                    'staff': staff
                 }
-                return render(request, 'forgetpw_staff.html', context)
+                return render(request, 'changepw_staff.html', context)
         
 class staff_profile(View):
     def get(self, request, staff_id):
@@ -332,7 +312,7 @@ class staff_update(View):
             return redirect("staff-home")
         staff = Staff.objects.get(pk=staff_id)
         print(staff.id)
-        form = StaffUpdateForm(instance=staff)
+        form = StaffForm(instance=staff)
         context = {
             'form': form,
             'staff_id': staff_id,
@@ -342,7 +322,7 @@ class staff_update(View):
         return render(request, 'update_staff.html', context)
     def post(self, request, staff_id):
         staff = Staff.objects.get(pk=staff_id)
-        form = StaffUpdateForm(request.POST, instance=staff)
+        form = StaffForm(request.POST, instance=staff)
         try:
             with transaction.atomic():
                 if form.is_valid():
@@ -358,44 +338,4 @@ class staff_update(View):
                     'staff': staff,
                 }
                 return render(request, 'update_staff.html', context)
-        
-# class update_course(View):
-#     def get(self, request, course_code, **thisiserror):
-#         print(course_code)
-#         course = Course.objects.get(course_code=course_code)
-#         print(course)
-#         section = Section.objects.filter(course_id=course.id).first()
-#         cform = CourseForm(request.POST, instance=course)
-#         sform = SectionForm(request.POST, instance=section)
-#         context = {
-#             'cform': cform,
-#             'sform': sform,
-#             'course_code': course_code,
-#         }
-#         context.update(thisiserror)
-#         return render(request, 'update_course.html', context)
 
-#     def post(self, request, course_code):
-#         course = Course.objects.get(course_code=course_code)
-#         section = Section.objects.filter(course_id=course.id).first()
-#         cform = CourseForm(request.POST, instance=course)
-#         sform = SectionForm(request.POST, instance=section)
-#         if cform.is_valid() and sform.is_valid():
-#             try:
-#                 course = cform.save()
-#                 section = sform.save(commit=False)
-#                 section.course = course
-#                 section.save()
-#                 return redirect('course-list')
-#             except Exception as e:
-#                 context = {
-#                     'cform': cform,
-#                     'sform': sform,
-#                 }
-#                 return render(request, 'update_course.html', context)
-#         else:
-#             context = {
-#                 'cform': cform,
-#                 'sform': sform,
-#             }
-#             return render(request, 'update_course.html', context)

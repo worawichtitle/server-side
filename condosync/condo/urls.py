@@ -18,6 +18,9 @@ urlpatterns = [
     path("update_user/<int:user_id>/", views.user_update.as_view(), name="user-update"),
     
 
+    # ex: /condo/logout/  or  {% url 'logout' %}
+    path("logout/", views.logout.as_view(), name="logout"),
+
     # ------STAFF----------------
     # ex: /condo/login_staff/  or  {% url 'staff-login' %}
     path("login_staff/", views.staff_login.as_view(), name="staff-login"),
@@ -25,8 +28,8 @@ urlpatterns = [
     path("home_staff/", views.staff_home.as_view(), name="staff-home"),
     # ex: /condo/regis_staff/  or  {% url 'staff-regis' %}
     path("regis_staff/", views.staff_regis.as_view(), name="staff-regis"),
-    # ex: /condo/forgetpw_staff/  or  {% url 'staff-forgetpw' %}
-    path("forgetpw_staff/", views.staff_forgetpw.as_view(), name="staff-forgetpw"),
+    # ex: /condo/changepw_staff/1/  or  {% url 'staff-changepw' staff_id %}
+    path("changepw_staff/<int:staff_id>/", views.staff_changepw.as_view(), name="staff-changepw"),
     # ex: /condo/profile_staff/1/  or  {% url 'staff-profile' staff_id %}
     path("profile_staff/<int:staff_id>/", views.staff_profile.as_view(), name="staff-profile"),
     # ex: /condo/update_staff/1/  or  {% url 'staff-update' staff_id %}

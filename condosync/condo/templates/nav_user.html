@@ -20,7 +20,7 @@
       </div>
 
       <div>
-        <a href="{% url 'user-profile' request.session.user_id %}" class="hover:text-blue-200 transition">{{ user.username }}</a>
+        <a href="{% url 'user-profile' request.session.user_id %}" class="hover:text-blue-200 transition">{{ request.session.username }}</a>
       </div>
     </nav>
   </header>

@@ -13,7 +13,6 @@ class UserForm(ModelForm):
         fields = ['username', 'first_name', 'last_name',
                   'email', 'phone', 'main_contact', 'address']
         widgets = {
-            # 'password_hash': forms.PasswordInput(attrs={'id': 'password_hash'}),
             'address': forms.Textarea(attrs={'rows': 3}),
         }
     def clean_username(self):
@@ -26,6 +25,12 @@ class UserForm(ModelForm):
         if User.objects.filter(email=data).exclude(pk=self.instance.pk).exists():
             raise ValidationError("This email is already in use")
         return data
+    def clean_phone(self):
+        data = self.cleaned_data.get("phone")
+        if not data.isdigit():
+            raise ValidationError("Phone number must contain only digits.")
+        return data
+
     # def clean(self):
     #     cleaned_data = super().clean()
     #     password = cleaned_data.get("password_hash")
@@ -120,11 +125,9 @@ class LoginForm(forms.Form):
 
 # -----------Staff----------------------------
 class StaffForm(ModelForm):
-    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'confirm_password'}),
-                                        label="Confirm Password")
     class Meta:
         model = Staff
-        fields = ['username', 'password_hash', 'first_name', 'last_name',
+        fields = ['username', 'first_name', 'last_name',
                   'email', 'phone', 'role']
         widgets = {
             'password_hash': forms.PasswordInput(attrs={'id': 'password_hash'}),
@@ -132,14 +135,30 @@ class StaffForm(ModelForm):
         }
     def clean_username(self):
         data = self.cleaned_data["username"]
-        if User.objects.filter(username=data).exists():
+        if Staff.objects.filter(username=data).exclude(pk=self.instance.pk).exists():
             raise ValidationError("This username is already in use")
         return data
     def clean_email(self):
         data = self.cleaned_data["email"]
-        if User.objects.filter(email=data).exclude(pk=self.instance.pk).exists():
+        if Staff.objects.filter(email=data).exclude(pk=self.instance.pk).exists():
             raise ValidationError("This email is already in use")
         return data
+    def clean_phone(self):
+        data = self.cleaned_data.get("phone")
+        if not data.isdigit():
+            raise ValidationError("Phone number must contain only digits.")
+        return data
+
+class StaffPWForm(ModelForm):
+    # username = forms.CharField(label="Username or Email")
+    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'confirm_password'}),
+                                        label="Confirm Password")
+    class Meta:
+        model = Staff
+        fields = ['password_hash']
+        widgets = {
+            'password_hash': forms.PasswordInput(attrs={'id': 'password_hash'}),
+        }
     def clean(self):
         cleaned_data = super().clean()
         password = cleaned_data.get("password_hash")
@@ -148,7 +167,6 @@ class StaffForm(ModelForm):
             raise ValidationError("Both password and confirm password are required.")
         if password != confirm:
             raise ValidationError("Passwords do not match")
-
         # Hash the password before saving
         cleaned_data["password_hash"] = hashlib.sha256(password.encode()).hexdigest()
         return cleaned_data
@@ -174,8 +192,40 @@ class StaffLoginForm(forms.Form):
         self.staff = staff
         return cleaned_data
     
-class StaffForgetPWForm(ModelForm):
-    username = forms.CharField(label="Username or Email")
+# class StaffForgetPWForm(ModelForm):
+#     username = forms.CharField(label="Username or Email")
+#     confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'confirm_password'}),
+#                                         label="Confirm Password")
+#     class Meta:
+#         model = Staff
+#         fields = ['password_hash']
+#         widgets = {
+#             'password_hash': forms.PasswordInput(attrs={'id': 'password_hash'}),
+#         }
+#     def clean(self):
+#         cleaned_data = super().clean()
+#         userinput = cleaned_data.get("username")
+#         password = cleaned_data.get("password_hash")
+#         confirm = self.cleaned_data.get("confirm_password")
+#         user = Staff.objects.filter(username=userinput).first()
+#         if not user:
+#             user = Staff.objects.filter(email=userinput).first()
+#         if not user:
+#             raise ValidationError("User not found.")
+        
+#         if not password or not confirm:
+#             raise ValidationError("Both password and confirm password are required.")
+#         if password != confirm:
+#             raise ValidationError("Passwords do not match")
+
+#         # Hash the password before saving
+#         cleaned_data["password_hash"] = hashlib.sha256(password.encode()).hexdigest()
+#         self.user = user
+#         return cleaned_data
+    
+class StaffChangePWForm(ModelForm):
+    password_old = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'password_old'}),
+                                        label="Old Password")
     confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'confirm_password'}),
                                         label="Confirm Password")
     class Meta:
@@ -184,42 +234,25 @@ class StaffForgetPWForm(ModelForm):
         widgets = {
             'password_hash': forms.PasswordInput(attrs={'id': 'password_hash'}),
         }
+    def __init__(self, *args, **kwargs):
+        self.staff_instance = kwargs.pop('instance', None)
+        super().__init__(*args, **kwargs)
+
     def clean(self):
         cleaned_data = super().clean()
-        userinput = cleaned_data.get("username")
+        old = cleaned_data.get("password_old")
         password = cleaned_data.get("password_hash")
-        confirm = self.cleaned_data.get("confirm_password")
-        user = Staff.objects.filter(username=userinput).first()
-        if not user:
-            user = Staff.objects.filter(email=userinput).first()
-        if not user:
-            raise ValidationError("User not found.")
-        
+        confirm = cleaned_data.get("confirm_password")
+        if not old:
+            raise ValidationError("Current password is required.")
+        if self.staff_instance.password_hash != hashlib.sha256(old.encode()).hexdigest():
+            raise ValidationError("Current password is incorrect.")
         if not password or not confirm:
             raise ValidationError("Both password and confirm password are required.")
         if password != confirm:
-            raise ValidationError("Passwords do not match")
+            raise ValidationError("New passwords do not match")
 
         # Hash the password before saving
         cleaned_data["password_hash"] = hashlib.sha256(password.encode()).hexdigest()
-        self.user = user
+        # self.user = user
         return cleaned_data
-    
-class StaffUpdateForm(ModelForm):
-    class Meta:
-        model = Staff
-        fields = ['username', 'first_name', 'last_name',
-                  'email', 'phone', 'role']
-        widgets = {
-            'role': forms.Select(),
-        }
-    def clean_username(self):
-        data = self.cleaned_data["username"]
-        if Staff.objects.filter(username=data).exclude(pk=self.instance.pk).exists():
-            raise ValidationError("This username is already in use")
-        return data
-    def clean_email(self):
-        data = self.cleaned_data["email"]
-        if Staff.objects.filter(email=data).exclude(pk=self.instance.pk).exists():
-            raise ValidationError("This email is already in use")
-        return data

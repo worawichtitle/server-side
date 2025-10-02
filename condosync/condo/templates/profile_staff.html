@@ -46,7 +46,7 @@ Staff Profile
   </div>
   {% if request.session.staff_id == staff_id %}
   <div class="flex items-center justify-end gap-3 pt-2">
-    <a href="{% url 'user-update' staff_id %}" class="px-5 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600">Change Password</a>
+    <a href="{% url 'staff-changepw' staff_id %}" class="px-5 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600">Change Password</a>
     <a href="{% url 'staff-update' staff_id %}" class="px-5 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600">Edit</a>
   </div>
   {% endif %}
