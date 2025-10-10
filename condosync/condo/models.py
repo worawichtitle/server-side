@@ -49,7 +49,7 @@ class Condo(models.Model):
     province = models.ForeignKey(Province, on_delete=models.CASCADE)
     address = models.TextField()
     area_sqm = models.FloatField()
-    deed_picture = models.CharField(max_length=255)
+    deed_picture = models.FileField(upload_to="image/")
     description = models.TextField(blank=True, null=True)
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now_add=True)
@@ -64,10 +64,12 @@ class Condo(models.Model):
     def __str__(self):
         return self.name
 
+def condo_image_upload_path(instance, filename):
+    return f'image/{instance.condo.id}/{filename}'
 
 class CondoImage(models.Model):
-    condo = models.ForeignKey(Condo, on_delete=models.CASCADE)
-    image_url = models.CharField(max_length=255)
+    condo = models.ForeignKey(Condo, on_delete=models.CASCADE, related_name='images')
+    image_url = models.FileField(upload_to=condo_image_upload_path)
     image_name = models.CharField(max_length=100)
     create_at = models.DateTimeField(auto_now_add=True)
     def __str__(self):

@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 
 import hashlib
 # -----------USER-----------------------------------
-class UserForm(ModelForm):
+class UserForm(forms.ModelForm):
     # confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'confirm_password'}),
     #                                     label="Confirm Password")
     class Meta:
@@ -45,7 +45,7 @@ class UserForm(ModelForm):
     #     cleaned_data["password_hash"] = hashlib.sha256(password.encode()).hexdigest()
     #     return cleaned_data
 
-class PWForm(ModelForm):
+class PWForm(forms.ModelForm):
     # username = forms.CharField(label="Username or Email")
     confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'confirm_password'}),
                                         label="Confirm Password")
@@ -67,7 +67,7 @@ class PWForm(ModelForm):
         cleaned_data["password_hash"] = hashlib.sha256(password.encode()).hexdigest()
         return cleaned_data
     
-class ChangePWForm(ModelForm):
+class ChangePWForm(forms.ModelForm):
     password_old = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'password_old'}),
                                         label="Old Password")
     confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'confirm_password'}),
@@ -124,7 +124,7 @@ class LoginForm(forms.Form):
         return cleaned_data
 
 # -----------Staff----------------------------
-class StaffForm(ModelForm):
+class StaffForm(forms.ModelForm):
     class Meta:
         model = Staff
         fields = ['username', 'first_name', 'last_name',
@@ -149,7 +149,7 @@ class StaffForm(ModelForm):
             raise ValidationError("Phone number must contain only digits.")
         return data
 
-class StaffPWForm(ModelForm):
+class StaffPWForm(forms.ModelForm):
     # username = forms.CharField(label="Username or Email")
     confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'confirm_password'}),
                                         label="Confirm Password")
@@ -192,38 +192,7 @@ class StaffLoginForm(forms.Form):
         self.staff = staff
         return cleaned_data
     
-# class StaffForgetPWForm(ModelForm):
-#     username = forms.CharField(label="Username or Email")
-#     confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'confirm_password'}),
-#                                         label="Confirm Password")
-#     class Meta:
-#         model = Staff
-#         fields = ['password_hash']
-#         widgets = {
-#             'password_hash': forms.PasswordInput(attrs={'id': 'password_hash'}),
-#         }
-#     def clean(self):
-#         cleaned_data = super().clean()
-#         userinput = cleaned_data.get("username")
-#         password = cleaned_data.get("password_hash")
-#         confirm = self.cleaned_data.get("confirm_password")
-#         user = Staff.objects.filter(username=userinput).first()
-#         if not user:
-#             user = Staff.objects.filter(email=userinput).first()
-#         if not user:
-#             raise ValidationError("User not found.")
-        
-#         if not password or not confirm:
-#             raise ValidationError("Both password and confirm password are required.")
-#         if password != confirm:
-#             raise ValidationError("Passwords do not match")
-
-#         # Hash the password before saving
-#         cleaned_data["password_hash"] = hashlib.sha256(password.encode()).hexdigest()
-#         self.user = user
-#         return cleaned_data
-    
-class StaffChangePWForm(ModelForm):
+class StaffChangePWForm(forms.ModelForm):
     password_old = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'password_old'}),
                                         label="Old Password")
     confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'confirm_password'}),
