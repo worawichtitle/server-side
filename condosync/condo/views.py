@@ -17,7 +17,7 @@ class user_login(View):
             'form': form
         }
         context.update(thisiserror)
-        return render(request, 'login_user.html', context)
+        return render(request, 'user/login_user.html', context)
     def post(self, request):
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -44,7 +44,7 @@ class user_home(View):
             'user_id': user_id,
             'user': user
         }
-        return render(request, 'home_user.html', context)
+        return render(request, 'user/home_user.html', context)
 
 class user_regis(View):
     def get(self, request, **thisiserror):
@@ -55,7 +55,7 @@ class user_regis(View):
             'pwform': pwform,
         }
         context.update(thisiserror)
-        return render(request, 'regis_user.html', context)
+        return render(request, 'user/regis_user.html', context)
     def post(self, request):
         form = UserForm(request.POST)
         pwform = PWForm(request.POST)
@@ -77,7 +77,7 @@ class user_regis(View):
                     'form': form,
                     'pwform': pwform,
                 }
-                return render(request, 'regis_user.html', context)
+                return render(request, 'user/regis_user.html', context)
 
 class user_changepw(View):
     def get(self, request, user_id, **thisiserror):
@@ -93,7 +93,7 @@ class user_changepw(View):
             'user': user,
         }
         context.update(thisiserror)
-        return render(request, 'changepw_user.html', context)
+        return render(request, 'user/changepw_user.html', context)
     def post(self, request, user_id):
         user = User.objects.get(pk=user_id)
         form = ChangePWForm(request.POST, instance=user)
@@ -112,7 +112,7 @@ class user_changepw(View):
                     'user_id': user_id,
                     'user': user
                 }
-                return render(request, 'changepw_user.html', context)
+                return render(request, 'user/changepw_user.html', context)
         
 class user_profile(View):
     def get(self, request, user_id):
@@ -132,7 +132,7 @@ class user_profile(View):
             'user_id': user_id,
             'user': user
         }
-        return render(request, 'profile_user.html', context)
+        return render(request, 'user/profile_user.html', context)
     
 class user_update(View):
     def get(self, request, user_id, **thisiserror):
@@ -149,7 +149,7 @@ class user_update(View):
             'user': user,
         }
         context.update(thisiserror)
-        return render(request, 'update_user.html', context)
+        return render(request, 'user/update_user.html', context)
     def post(self, request, user_id):
         user = User.objects.get(pk=user_id)
         form = UserForm(request.POST, instance=user)
@@ -167,7 +167,7 @@ class user_update(View):
                     'user_id': user_id,
                     'user': user,
                 }
-                return render(request, 'update_user.html', context)
+                return render(request, 'user/update_user.html', context)
         
 
 class logout(View):
@@ -189,7 +189,7 @@ class staff_login(View):
             'form': form
         }
         context.update(thisiserror)
-        return render(request, 'login_staff.html', context)
+        return render(request, 'staff/login_staff.html', context)
     def post(self, request):
         form = StaffLoginForm(request.POST)
         if form.is_valid():
@@ -216,11 +216,7 @@ class staff_home(View):
             'staff_id': staff_id,
             'staff': staff
         }
-        # context = {
-        #     'username': request.session.get("username"),
-        #     'staff_id': request.session.get("staff_id")
-        # }
-        return render(request, 'home_staff.html', context)
+        return render(request, 'staff/home_staff.html', context)
     
 class staff_regis(View):
     def get(self, request, **thisiserror):
@@ -231,7 +227,7 @@ class staff_regis(View):
             'pwform': pwform,
         }
         context.update(thisiserror)
-        return render(request, 'regis_staff.html', context)
+        return render(request, 'staff/regis_staff.html', context)
     def post(self, request):
         form = StaffForm(request.POST)
         pwform = StaffPWForm(request.POST)
@@ -251,7 +247,7 @@ class staff_regis(View):
                     'form': form,
                     'pwform': pwform,
                 }
-                return render(request, 'regis_staff.html', context)
+                return render(request, 'staff/regis_staff.html', context)
         
 class staff_changepw(View):
     def get(self, request, staff_id, **thisiserror):
@@ -267,7 +263,7 @@ class staff_changepw(View):
             'staff': staff,
         }
         context.update(thisiserror)
-        return render(request, 'changepw_staff.html', context)
+        return render(request, 'staff/changepw_staff.html', context)
     def post(self, request, staff_id):
         staff = Staff.objects.get(pk=staff_id)
         form = StaffChangePWForm(request.POST, instance=staff)
@@ -286,7 +282,7 @@ class staff_changepw(View):
                     'staff_id': staff_id,
                     'staff': staff
                 }
-                return render(request, 'changepw_staff.html', context)
+                return render(request, 'staff/changepw_staff.html', context)
         
 class staff_profile(View):
     def get(self, request, staff_id):
@@ -302,7 +298,7 @@ class staff_profile(View):
             'staff_id': staff_id,
             'staff': staff
         }
-        return render(request, 'profile_staff.html', context)
+        return render(request, 'staff/profile_staff.html', context)
 
 class staff_update(View):
     def get(self, request, staff_id, **thisiserror):
@@ -319,7 +315,7 @@ class staff_update(View):
             'staff': staff,
         }
         context.update(thisiserror)
-        return render(request, 'update_staff.html', context)
+        return render(request, 'staff/update_staff.html', context)
     def post(self, request, staff_id):
         staff = Staff.objects.get(pk=staff_id)
         form = StaffForm(request.POST, instance=staff)
@@ -337,5 +333,5 @@ class staff_update(View):
                     'staff_id': staff_id,
                     'staff': staff,
                 }
-                return render(request, 'update_staff.html', context)
+                return render(request, 'staff/update_staff.html', context)
 
