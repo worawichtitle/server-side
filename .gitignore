@@ -1,4 +1,6 @@
 myvenv/
 condosync/condo/templates/old/
 __pycache__/
+*.pyc
 migrations/
+media/

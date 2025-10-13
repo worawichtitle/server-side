@@ -1,6 +1,6 @@
 from django import forms
 from condo.models import *
-from django.forms import ModelForm
+from django.forms import BaseModelFormSet, ModelForm, modelformset_factory
 from django.core.exceptions import ValidationError
 
 import hashlib
@@ -122,6 +122,93 @@ class LoginForm(forms.Form):
             raise ValidationError("Incorrect username or password.")
         self.user = user
         return cleaned_data
+    
+class CondoForm(forms.ModelForm):
+    deed_number = forms.CharField(
+        max_length=100, # กำหนด max_length ให้สอดคล้องกับ Model
+        label="หมายเลขโฉนด",
+        required=True # บังคับกรอก
+    )
+    class Meta:
+        model = Condo
+        fields = ['name', 'province', 'address', 'area_sqm', 'deed_picture', 'description']
+        # ตัวอย่าง widgets
+        widgets = {
+            'province': forms.Select(),
+            'area_sqm': forms.NumberInput(attrs={'min': '0'}),
+            'address': forms.Textarea(attrs={'rows': 3}),
+            'deed_picture': forms.FileInput(attrs={"class": "hidden"}),
+            'description': forms.Textarea(attrs={'rows': 4}),
+        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['province'].empty_label = "--กรุณาเลือกจังหวัด--"
+
+
+    def clean_area_sqm(self):
+        data = self.cleaned_data.get("area_sqm")
+        if data <= 0:
+            raise ValidationError("พื้นที่ต้องมากกว่า 0 ตารางเมตร")
+        return data
+    def clean_deed_picture(self):
+        data = self.cleaned_data.get("deed_picture")
+        if not data:
+            raise ValidationError("ต้องอัปโหลดรูปภาพสำเนาโฉนด")
+        return data
+
+class CondoListingForm(forms.ModelForm):
+    class Meta:
+        model = CondoListing
+        fields = ['asking_price', 'note']
+        widgets = {
+            'note': forms.Textarea(attrs={'rows': 3}),
+        }
+    def clean_asking_price(self):
+        data = self.cleaned_data.get("asking_price")
+        if data <= 0:
+            raise ValidationError("ราคาที่ขอต้องมากกว่า 0 บาท")
+        return data
+
+class CondoImageForm(forms.ModelForm):
+    # เราใช้ image_url ที่เป็น FileField ใน Model
+    class Meta:
+        model = CondoImage
+        # image_name จะถูกกำหนดใน views.py จากชื่อไฟล์ที่อัปโหลด
+        fields = ['image_url']
+
+class AtLeastOneImageFormSet(BaseModelFormSet):
+    def clean(self):
+        super_clean = super().clean()
+        # ถ้ามี error ของ form ย่อย ให้ปล่อยให้แสดง (จะไม่ซ้ำ)
+        if any(self.errors):
+            return super_clean
+
+        filled = 0
+        for form in self.forms:
+            # form.cleaned_data อาจไม่มีถ้า form มี error ก่อนหน้านี้
+            cd = getattr(form, 'cleaned_data', None)
+            if not cd:
+                continue
+            # ข้ามฟอร์มที่ผู้ใช้ติ๊กลบ (ถ้าใช้ can_delete)
+            if cd.get('DELETE'):
+                continue
+            # ถ้ามีไฟล์ใน image_url ให้ถือว่า filled
+            if cd.get('image_url'):
+                filled += 1
+
+        if filled < 1:
+            raise ValidationError("ต้องอัปโหลดอย่างน้อย 1 รูปภาพประกอบ")
+        return super_clean
+
+# Formset สำหรับจัดการหลายรูปภาพ
+CondoImageFormSet = modelformset_factory(
+    CondoImage, 
+    form=CondoImageForm,
+    formset=AtLeastOneImageFormSet,
+    fields=['image_url'],
+    extra= 3, # เริ่มต้นด้วยฟอร์มเปล่า 3 ฟอร์ม
+    max_num=20, # อนุญาตสูงสุด 20 ไฟล์
+)
 
 # -----------Staff----------------------------
 class StaffForm(forms.ModelForm):

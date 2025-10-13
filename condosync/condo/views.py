@@ -12,7 +12,7 @@ from django.db import transaction
 # -----------USER--------------------------------
 class user_login(View):
     def get(self, request, **thisiserror):
-        form = LoginForm(request.POST)
+        form = LoginForm()
         context = {
             'form': form
         }
@@ -29,7 +29,7 @@ class user_login(View):
             return redirect("user-home")
         else:
             print("Form error:", form.errors)
-            return self.get(request, error=form.errors)
+            return render(request, 'user/login_user.html', {'form': form})
 
 class user_home(View):
     def get(self, request):
@@ -48,8 +48,8 @@ class user_home(View):
 
 class user_regis(View):
     def get(self, request, **thisiserror):
-        form = UserForm(request.POST)
-        pwform = PWForm(request.POST)
+        form = UserForm()
+        pwform = PWForm()
         context = {
             'form': form,
             'pwform': pwform,
@@ -86,7 +86,7 @@ class user_changepw(View):
         if request.session.get("user_id") != user_id:
             return redirect("user-home")
         user = User.objects.get(pk=user_id)
-        form = ChangePWForm(request.POST, instance=user)
+        form = ChangePWForm(instance=user)
         context = {
             'form': form,
             'user_id': user_id,
@@ -169,6 +169,102 @@ class user_update(View):
                 }
                 return render(request, 'user/update_user.html', context)
         
+class condo_create(View):
+    # กำหนด Formset ภายใน View เพื่อให้ง่ายต่อการเรียกใช้ (ถ้าไม่ได้กำหนดใน forms.py)
+    # แต่เนื่องจากเรากำหนดแล้วใน forms.py ให้ใช้ที่ import มา
+
+    def get(self, request):
+        user_id = request.session.get("user_id")
+        if not user_id:
+            return redirect("user-login")
+        user = User.objects.get(pk=user_id)
+        condo_form = CondoForm()
+        listing_form = CondoListingForm()
+        image_formset = CondoImageFormSet(queryset=CondoImage.objects.none()) 
+        
+        context = {
+            'condo_form': condo_form,
+            'listing_form': listing_form,
+            'image_formset': image_formset,
+            'user_id': user_id,
+            'user': user,
+        }
+        return render(request, 'user/create_condo.html', context)
+
+    def post(self, request):
+        user_id = request.session.get("user_id")
+        user = User.objects.get(pk=user_id)
+        condo_form = CondoForm(request.POST, request.FILES)
+        listing_form = CondoListingForm(request.POST)
+        image_formset = CondoImageFormSet(request.POST, request.FILES, queryset=CondoImage.objects.none())
+        
+        
+        # ตรวจสอบความถูกต้องของทุกฟอร์ม
+        if condo_form.is_valid() and listing_form.is_valid() and image_formset.is_valid():
+            try:
+                with transaction.atomic():
+                    deed_num = condo_form.cleaned_data['deed_number']
+                    if Condo.objects.filter(deed_number=deed_num).exists():
+                        condo = Condo.objects.get(deed_number=deed_num)
+                        new_listing = listing_form.save(commit=False)
+                        new_listing.condo = condo
+                        new_listing.user = user # กำหนด Foreign Key ไปที่ผู้ใช้ที่ล็อกอินอยู่
+                        new_listing.save()
+                        return redirect('user-home')
+                    print('Condo form valid')
+                    # 1. บันทึก Condo หลัก
+                    new_condo = condo_form.save()
+                    print('New condo created:', new_condo.id, new_condo.name)
+                    # 2. บันทึก CondoListing (ต้องเชื่อมโยงกับ user และ condo)
+                    print('Listing form valid')
+                    new_listing = listing_form.save(commit=False)
+                    new_listing.condo = new_condo
+                    new_listing.user = user # กำหนด Foreign Key ไปที่ผู้ใช้ที่ล็อกอินอยู่
+                    new_listing.save()
+                    print('New listing created:', new_listing.id, new_listing.condo.name, new_listing.user.username)
+                    # 3. บันทึก CondoImage Formset
+                    print('Image formset valid')
+                    for form in image_formset:
+                        # ตรวจสอบว่ามีการอัปโหลดไฟล์ในช่องนั้นๆ จริงหรือไม่
+                        if form.cleaned_data and form.cleaned_data.get('image_url'):
+                            condo_image = form.save(commit=False)
+                            condo_image.condo = new_condo  # เชื่อมโยงกับ Condo ที่สร้างใหม่
+                            
+                            # กำหนด image_name จากชื่อไฟล์ที่อัปโหลด
+                            uploaded_file = form.cleaned_data.get('image_url')
+                            condo_image.image_name = uploaded_file.name 
+                            
+                            condo_image.save()
+                    return redirect('user-home')
+
+            except Exception as e:
+                # จัดการข้อผิดพลาด
+                print(f"Error during save: {e}")
+                # อาจจะเพิ่มข้อความ error ให้ผู้ใช้เห็น
+                context = {
+                    'condo_form': condo_form,
+                    'listing_form': listing_form,
+                    'image_formset': image_formset,
+                    'user_id': user_id,
+                    'user': user,
+                }
+                return render(request, 'user/create_condo.html', context)
+        else:
+            print("Form errors:")
+            print("Condo form errors:", condo_form.errors)
+            print("Listing form errors:", listing_form.errors)
+            print("Image formset errors:", image_formset.errors)
+            print("Image formset non-field errors:", image_formset.non_form_errors())
+            # หากมีข้อผิดพลาดในการตรวจสอบความถูกต้อง
+            context = {
+                'condo_form': condo_form,
+                'listing_form': listing_form,
+                'image_formset': image_formset,
+                'user_id': user_id,
+                'user': user,
+            }
+            return render(request, 'user/create_condo.html', context)
+        
 
 class logout(View):
     def get(self, request):
@@ -184,7 +280,7 @@ class logout(View):
 # -----------STAFF------------------------------------------------
 class staff_login(View):
     def get(self, request, **thisiserror):
-        form = StaffLoginForm(request.POST)
+        form = StaffLoginForm()
         context = {
             'form': form
         }
@@ -201,7 +297,7 @@ class staff_login(View):
             return redirect("staff-home")
         else:
             print("Form error:", form.errors)
-            return self.get(request, error=form.errors)
+            return render(request, 'staff/login_staff.html', {'form': form})
 
 class staff_home(View):
     def get(self, request):
@@ -220,8 +316,8 @@ class staff_home(View):
     
 class staff_regis(View):
     def get(self, request, **thisiserror):
-        form = StaffForm(request.POST)
-        pwform = StaffPWForm(request.POST)
+        form = StaffForm()
+        pwform = StaffPWForm()
         context = {
             'form': form,
             'pwform': pwform,
@@ -256,7 +352,7 @@ class staff_changepw(View):
         if request.session.get("staff_id") != staff_id:
             return redirect("staff-home")
         staff = Staff.objects.get(pk=staff_id)
-        form = StaffChangePWForm(request.POST, instance=staff)
+        form = StaffChangePWForm(instance=staff)
         context = {
             'form': form,
             'staff_id': staff_id,

@@ -10,17 +10,14 @@ Login User
 {% endblock %}
 
 {% block head %}
+    CondoSync
 {% endblock %}
 
 {% block content %}
-    <main class="p-6 max-w-3xl mx-auto">
         <div class="flex items-center justify-between mb-2">
-      <h1 class="text-3xl font-bold text-orange-500">Login</h1>
-      <a href="{% url 'user-regis' %}" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600">Sign Up</a>
-    </div>
-        {% comment %} {% if error %}
-            <h1 class='text-red-400'>{{error}}</h1>
-        {% endif %} {% endcomment %}
+            <h1 class="text-3xl font-bold text-orange-500">Login</h1>
+            <a href="{% url 'user-regis' %}" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600">Sign Up</a>
+        </div>
 
         <form method="post" class="space-y-6">
             {% csrf_token %}
@@ -51,7 +48,9 @@ Login User
                 Login
             </button>
         </form>
-    </main>
+        {% endblock %}
+        {% block footer %}
+        {% endblock %}
     {% block script %} <script src="{% static 'showpassword.js' %}"></script> {% endblock %}
-{% endblock %}
+
 

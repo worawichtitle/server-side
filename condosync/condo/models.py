@@ -39,10 +39,6 @@ class Province(models.Model):
         return self.name
 
 
-# class CondoStatus(models.Model):
-#     name = models.CharField(max_length=50)
-
-
 class Condo(models.Model):
     deed_number = models.CharField(max_length=100, unique=True)
     name = models.CharField(max_length=200)
@@ -54,13 +50,13 @@ class Condo(models.Model):
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now_add=True)
     class CondoStatus(models.TextChoices):
-        NULL = "NUL", "NULL"
-        CHECK = "CHK", "CHECK"
-        FAIL = "FAL", "FAIL"
-        PASS = "PAS", "PASS"
-        BUY = "BUY", "BUY"
+        NULL = "NUL", "รอการตรวจสอบ"
+        CHECK = "CHK", "กำลังตรวจสอบ"
+        FAIL = "FAL", "ไม่ผ่าน"
+        CANCEL = "CAL", "ยกเลิก"
+        PASS = "PAS", "ผ่าน"
+        BUY = "BUY", "ซื้อแล้ว"
     status = models.CharField(max_length=3, choices=CondoStatus.choices, default=CondoStatus.NULL)
-    # status = models.ForeignKey(CondoStatus, on_delete=models.SET_NULL, null=True)
     def __str__(self):
         return self.name
 
@@ -77,7 +73,6 @@ class CondoImage(models.Model):
 
 
 class CondoReport(models.Model):
-    # author = models.ForeignKey(Staff, on_delete=models.CASCADE)
     author = models.ManyToManyField(Staff) # M to M
     condo = models.ForeignKey(Condo, on_delete=models.CASCADE)
     report = models.TextField()

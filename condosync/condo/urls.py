@@ -4,35 +4,37 @@ from . import views
 from condo.views import *
 
 urlpatterns = [
-    # ex: /condo/login/  or  {% url 'user-login' %}
+    # ex: /  or  {% url 'user-login' %}
     path("", views.user_login.as_view(), name="user-login"),
-    # ex: /condo/regis/  or  {% url 'user-regis' %}
+    # ex: /regis/  or  {% url 'user-regis' %}
     path("regis/", views.user_regis.as_view(), name="user-regis"),
-    # ex: /condo/changepw/1/  or  {% url 'user-changepw' user_id %}
+    # ex: /changepw/1/  or  {% url 'user-changepw' user_id %}
     path("changepw/<int:user_id>/", views.user_changepw.as_view(), name="user-changepw"),
-    # ex: /condo/home/  or  {% url 'user-home' %}
+    # ex: /home/  or  {% url 'user-home' %}
     path("home/", views.user_home.as_view(), name="user-home"),
-     # ex: /condo/profile_user/1/  or  {% url 'user-profile' user_id %}
+     # ex: /profile_user/1/  or  {% url 'user-profile' user_id %}
     path("profile_user/<int:user_id>/", views.user_profile.as_view(), name="user-profile"),
-    # ex: /condo/update_user/1/  or  {% url 'user-update' user_id %}
+    # ex: /update_user/1/  or  {% url 'user-update' user_id %}
     path("update_user/<int:user_id>/", views.user_update.as_view(), name="user-update"),
+    # ex: /create_condo/  or  {% url 'condo-create' user_id %}
+    path("create_condo/", views.condo_create.as_view(), name="condo-create"),
     
 
-    # ex: /condo/logout/  or  {% url 'logout' %}
+    # ex: /logout/  or  {% url 'logout' %}
     path("logout/", views.logout.as_view(), name="logout"),
 
     # ------STAFF----------------
-    # ex: /condo/login_staff/  or  {% url 'staff-login' %}
+    # ex: /login_staff/  or  {% url 'staff-login' %}
     path("login_staff/", views.staff_login.as_view(), name="staff-login"),
-    # ex: /condo/home_staff/  or  {% url 'staff-home' %}
+    # ex: /home_staff/  or  {% url 'staff-home' %}
     path("home_staff/", views.staff_home.as_view(), name="staff-home"),
-    # ex: /condo/regis_staff/  or  {% url 'staff-regis' %}
+    # ex: /regis_staff/  or  {% url 'staff-regis' %}
     path("regis_staff/", views.staff_regis.as_view(), name="staff-regis"),
-    # ex: /condo/changepw_staff/1/  or  {% url 'staff-changepw' staff_id %}
+    # ex: /changepw_staff/1/  or  {% url 'staff-changepw' staff_id %}
     path("changepw_staff/<int:staff_id>/", views.staff_changepw.as_view(), name="staff-changepw"),
-    # ex: /condo/profile_staff/1/  or  {% url 'staff-profile' staff_id %}
+    # ex: /profile_staff/1/  or  {% url 'staff-profile' staff_id %}
     path("profile_staff/<int:staff_id>/", views.staff_profile.as_view(), name="staff-profile"),
-    # ex: /condo/update_staff/1/  or  {% url 'staff-update' staff_id %}
+    # ex: /update_staff/1/  or  {% url 'staff-update' staff_id %}
     path("update_staff/<int:staff_id>/", views.staff_update.as_view(), name="staff-update"),
 
 
