@@ -210,7 +210,7 @@ class condo_create(View):
                         new_listing.condo = condo
                         new_listing.user = user # กำหนด Foreign Key ไปที่ผู้ใช้ที่ล็อกอินอยู่
                         new_listing.save()
-                        return redirect('user-home')
+                        return redirect('condo-list')
                     print('Condo form valid')
                     # 1. บันทึก Condo หลัก
                     new_condo = condo_form.save()
@@ -235,7 +235,7 @@ class condo_create(View):
                             condo_image.image_name = uploaded_file.name 
                             
                             condo_image.save()
-                    return redirect('user-home')
+                    return redirect('condo-list')
 
             except Exception as e:
                 # จัดการข้อผิดพลาด
@@ -265,6 +265,67 @@ class condo_create(View):
             }
             return render(request, 'user/create_condo.html', context)
         
+
+class condo_list(View):
+    def get(self, request):
+        if not request.session.get("user_id") and not request.session.get("staff_id"):
+            return redirect("user-login")
+        search = request.GET.get("search", "")
+        s_filter = request.GET.get("filter", "")
+        list_all = CondoListing.objects.all().select_related('condo', 'condo__province').prefetch_related('condo__images').order_by('-condo__update_at')
+        if not request.session.get("staff_id"):
+            user = User.objects.get(pk=request.session.get("user_id"))
+            list_all = list_all.filter(user=user)
+        else:
+            user = Staff.objects.get(pk=request.session.get("staff_id"))
+        if search:
+            if s_filter == "name":
+                condo_list = list_all.filter(condo__name__icontains=search)
+            elif s_filter == "status":
+                condo_list = list_all.filter(
+                Q(condo__status__icontains=search) | 
+                Q(condo__status__in=[value for value, label in Condo.CondoStatus.choices if search in label])
+            )
+            elif s_filter == "user" and request.session.get("staff_id"):
+                condo_list = list_all.filter(
+                Q(user__username__icontains=search) | 
+                Q(user__first_name__icontains=search) | 
+                Q(user__last_name__icontains=search)
+            )
+            else:
+                condo_list = list_all.filter(condo__deed_number__icontains=search)
+        else:
+            condo_list = list_all
+        total = condo_list.count()
+        return render(request, 'condo_list.html', context={
+            "user": user,
+            "condo_list": condo_list,
+            "total": total,
+            "search": search,
+            "filter": s_filter
+        })
+    
+class condo_detail(View):
+    # กำหนด Formset ภายใน View เพื่อให้ง่ายต่อการเรียกใช้ (ถ้าไม่ได้กำหนดใน forms.py)
+    # แต่เนื่องจากเรากำหนดแล้วใน forms.py ให้ใช้ที่ import มา
+
+    def get(self, request):
+        user_id = request.session.get("user_id")
+        if not user_id:
+            return redirect("user-login")
+        user = User.objects.get(pk=user_id)
+        condo_form = CondoForm()
+        listing_form = CondoListingForm()
+        image_formset = CondoImageFormSet(queryset=CondoImage.objects.none()) 
+        
+        context = {
+            'condo_form': condo_form,
+            'listing_form': listing_form,
+            'image_formset': image_formset,
+            'user_id': user_id,
+            'user': user,
+        }
+        return render(request, 'user/create_condo.html', context)
 
 class logout(View):
     def get(self, request):

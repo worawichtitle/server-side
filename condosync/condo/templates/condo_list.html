@@ -1,291 +1,158 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}Create Condo{% endblock %}
+{% block title %}คอนโดที่ขาย{% endblock %}
 
  {% block head %}
-     <a href="{% url 'user-home' %}" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600">กลับ</a>
-          <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent leading-loose">แก้ไขการจอง ⚙️</h1>
-                    <p class="text-gray-600 text-lg">ใส่ข้อมูลคอนโด</p>
-                </div>
+          <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent leading-loose">คอนโดที่ขาย</h1>
+                <p class="text-gray-600 text-lg">
+                คุณมี <span class="font-bold text-blue-600">{{total}}</span> คอนโด
+                </p>
             </div>
+          </div>
+
+        <!-- Filter Section -->
+        <section aria-label="Filter content" class="flex flex-row justify-between items-start gap-x-4 flex-wrap mb-8">
+            <!-- Filter buttons -->
+            <div class="flex flex-row gap-x-3" aria-label="Advanced Filters">
+                <label for="deed_name">
+                    <input type="radio" id="deed_name" name="a_filter" value="deed_name" class="peer hidden" {% if filter == 'deed_name' or filter == '' or filter == None %}checked{% endif %} />
+                    <div class="cursor-pointer px-6 py-3 rounded-xl border-2 border-gray-200 bg-white bg-opacity-70 peer-checked:bg-gradient-to-r peer-checked:from-blue-500 peer-checked:to-purple-500 peer-checked:text-white peer-checked:border-transparent smooth-transition hover-lift shadow-md peer-checked:shadow-lg font-medium">
+                        📅 เลขโฉนด
+                    </div>
+                </label>
+                <label for="name">
+                    <input type="radio" id="name" name="a_filter" value="name" class="peer hidden" {% if filter == 'name' %}checked{% endif %} />
+                    <div class="cursor-pointer px-6 py-3 rounded-xl border-2 border-gray-200 bg-white bg-opacity-70 peer-checked:bg-gradient-to-r peer-checked:from-green-500 peer-checked:to-emerald-500 peer-checked:text-white peer-checked:border-transparent smooth-transition hover-lift shadow-md peer-checked:shadow-lg font-medium">
+                        🏢 ชื่อคอนโด
+                    </div>
+                </label>
+                <label for="status">
+                    <input type="radio" id="status" name="a_filter" value="status" class="peer hidden" {% if filter == 'status' %}checked{% endif %} />
+                    <div class="cursor-pointer px-6 py-3 rounded-xl border-2 border-gray-200 bg-white bg-opacity-70 peer-checked:bg-gradient-to-r peer-checked:from-orange-500 peer-checked:to-red-500 peer-checked:text-white peer-checked:border-transparent smooth-transition hover-lift shadow-md peer-checked:shadow-lg font-medium">
+                        📊 สถานะ
+                    </div>
+                </label>
+                {% if request.session.staff_id %}
+                <label for="user">
+                    <input type="radio" id="user" name="a_filter" value="user" class="peer hidden" {% if filter == 'user' %}checked{% endif %} />
+                    <div class="cursor-pointer px-6 py-3 rounded-xl border-2 border-gray-200 bg-white bg-opacity-70 peer-checked:bg-gradient-to-r peer-checked:from-orange-500 peer-checked:to-red-500 peer-checked:text-white peer-checked:border-transparent smooth-transition hover-lift shadow-md peer-checked:shadow-lg font-medium">
+                        👤 ชื่อผู้ขาย
+                    </div>
+                </label>
+                {% endif %}
+            </div>
+
+           <!-- Search + Clear -->
+          <div class="flex flex-row items-center gap-x-3">
+              <input 
+                  class="w-[350px] py-3 px-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent smooth-transition bg-white bg-opacity-70 shadow-md" 
+                  id="search" 
+                  type="text" 
+                  placeholder="🔍 ค้นหาคอนโด..." 
+                  autocomplete="search" 
+                  value="{{search}}" 
+                  title="Filter data" 
+              />
+              <a href="{% url 'condo-list' %}">
+                  <div class="cursor-pointer px-6 py-3 rounded-xl border-2 border-transparent bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600 smooth-transition hover-lift shadow-lg font-medium flex items-center space-x-2">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                      </svg>
+                      <span>รีเฟรช</span>
+                  </div>
+              </a>
+          </div>
+
+        </section>
 {% endblock %}
 
 
 {% block content %} 
-    <form method="POST" class="space-y-8" enctype="multipart/form-data">
-        {% csrf_token %}
-        <h2 class="text-2xl font-bold text-orange-500 mb-4">ข้อมูลคอนโด</h2>
-        {% if condo_form.non_field_errors %}
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                <strong class="font-bold">Error!</strong>
-                <span class="block sm:inline">{{ condo_form.non_field_errors }}</span>
-            </div>
-        {% endif %}
+<div class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">รายการประกาศคอนโดทั้งหมด</h1>
+        <a href="{% url 'condo-create' %}" 
+           class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">
+            + เพิ่มคอนโด
+        </a>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for listing in condo_list %}
+        <a href="#"
+        {% comment %} <a href="{% url 'condo-detail' pk=listing.pk %}" {% endcomment %}
+        class="block bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl hover:border-blue-400 transition duration-300 ease-in-out">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
 
-        <div class="grid sm:grid-cols-2 gap-6 form-control">
-            <div class="">
-            <label for="{{ condo_form.deed_number.id_for_label }}" class="block text-sm font-medium text-gray-700">เลขโฉนด</label>
-            <h1 class='text-red-400'>{{ condo_form.deed_number.errors }}</h1>
-            {{ condo_form.deed_number }}
-            </div>
-
-            <div>
-            <label for="{{ condo_form.name.id_for_label }}" class="block text-sm font-medium text-gray-700">ชื่อคอนโด</label>
-            <h1 class='text-red-400'>{{ condo_form.name.errors }}</h1>
-            {{ condo_form.name }}
-            </div>
-        </div>
-        <div class="grid sm:grid-cols-2 gap-6 form-control">
-            <div class="">
-            <label for="{{ condo_form.province.id_for_label }}" class="block text-sm font-medium text-gray-700">จังหวัด</label>
-            <h1 class='text-red-400'>{{ condo_form.province.errors }}</h1>
-            {{ condo_form.province }}
-            </div>
-
-            <div>
-            <label for="{{ condo_form.area_sqm.id_for_label }}" class="block text-sm font-medium text-gray-700">พื้นที่ (ตร.ม.)</label>
-            <h1 class='text-red-400'>{{ condo_form.area_sqm.errors }}</h1>
-            {{ condo_form.area_sqm }}
-            </div>
-        </div>
-        <div class="form-control">
-            <div>
-            <label for="{{ condo_form.address.id_for_label }}" class="block text-sm font-medium text-gray-700">ที่อยู่</label>
-            <h1 class='text-red-400'>{{condo_form.address.errors}}</h1>
-            {{ condo_form.address }}
-            </div>
-        </div>
-        <div class="form-control">
-            <div>
-            <label for="{{ condo_form.description.id_for_label }}" class="block text-sm font-medium text-gray-700">รายละเอียดคอนโด</label>
-            <h1 class='text-red-400'>{{condo_form.description.errors}}</h1>
-            {{ condo_form.description }}
-            </div>
-        </div>
-        <div class="grid sm:grid-cols-2 gap-6 form-control">
-            <div class="">
-            <label class="block text-sm font-medium text-gray-700 mb-2">รูปโฉนด</label>
-            <!-- ปุ่มเลือกไฟล์ -->
-            <label for="{{ condo_form.deed_picture.id_for_label }}" class="inline-block cursor-pointer px-5 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400">ใส่รูปโฉนด</label>
-            {% for error in condo_form.deed_picture.errors %}
-                <p class='text-red-500 text-xs mt-2'>{{ error }}</p>
-            {% endfor %}
-            {# input ถูกซ่อนด้วย class hidden จาก forms.py #}
-            {{ condo_form.deed_picture }}
-            </div>
-
-            <div>
-                <img id="preview" class="m-auto mt-3 rounded-lg border max-h-64 object-contain hidden" alt="Preview" />
-            </div>
-        </div>
-        <fieldset class="border p-4 mb-6" id="image-formset-container">
-            <legend class="text-lg font-semibold px-2">รูปภาพประกอบ (สูงสุด 20 ภาพ)</legend>
-            {% if image_formset.non_form_errors %}
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-                    {{ image_formset.non_form_errors }} 
-                </div>
-            {% endif %}
-            {{ image_formset.management_form }}
-            
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="form-list">
-                
-                {% for form in image_formset %}
-                <div class="p-3 border rounded-md image-form-item" data-index="{{ forloop.counter0 }}">
-                    <label class="block text-sm font-medium mb-2">
-                    รูปภาพ #<span class="image-number">{{ forloop.counter }}</span>
-                    </label>
-
-                    <div class="relative">
-                    {{ form.image_url }}
-                    <button type="button" class="remove-form-btn absolute top-0 right-0 text-xs bg-red-500 text-white px-2 py-1 rounded hidden">ลบ</button>
+                {% with condo=listing.condo %}
+                    
+                    {% with first_image=condo.images.first %}
+                        <div class="h-48 bg-gray-200 overflow-hidden">
+                            {% if first_image %}
+                                <img src="{{ first_image.image_url.url }}" alt="{{ condo.name }}" 
+                                     class="w-full h-full object-cover">
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center text-gray-500">
+                                    ไม่มีรูปภาพ
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endwith %}
+                    
+                    <div class="p-4">
+                        
+                        <h2 class="text-xl font-semibold mb-2 truncate-name" title="{{ condo.name }}">
+                            {{ condo.name }}
+                        </h2>
+                        
+                        <div class="flex justify-between items-center text-sm mb-3">
+                            <span class="text-gray-600">
+                                <i class="fas fa-map-marker-alt mr-1"></i> 
+                                จังหวัด: {{ condo.province.name }}
+                            </span>
+                            
+                            <span class="font-medium px-2 py-0.5 rounded-full 
+                                {% if condo.status == 'PAS' %}bg-green-100 text-green-700
+                                {% elif condo.status == 'FAL' or condo.status == 'CAL' %}bg-red-100 text-red-700
+                                {% elif condo.status == 'BUY' %}bg-blue-100 text-blue-700
+                                {% elif condo.status == 'CHK' %}bg-yellow-100 text-yellow-700
+                                {% else %}bg-gray-100 text-gray-700{% endif %}">
+                                {{ condo.get_status_display }}
+                            </span>
+                        </div>
+                        
+                        <p class="text-gray-500 text-sm line-clamp-2 mb-3">
+                            {{ condo.description|default:"ไม่มีคำอธิบายเพิ่มเติมสำหรับคอนโดนี้" }}
+                        </p>
+                        <div class="flex justify-between items-center text-sm mb-3">
+                            <span class="text-gray-600">
+                                <i class="fas fa-map-marker-alt mr-1"></i> 
+                                ผู้ขาย: {{ listing.user.first_name }} {{ listing.user.last_name }}
+                            </span>
+                            
+                            <span class="text-gray-600">
+                                <i class="fas fa-map-marker-alt mr-1"></i> 
+                                ราคา: {{ listing.asking_price }}฿
+                            </span>
+                        </div>
                     </div>
-
-                    {% if form.image_url.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ form.image_url.errors }}</p>
-                    {% endif %}
-
-                    <img class="preview-image mt-2 rounded-lg border max-h-40 object-contain hidden" alt="Preview">
-                </div>
-                {% endfor %}
+                {% endwith %}
+                
             </div>
-
-            <div class="mt-3 flex items-center gap-3">
-                <button type="button" id="add-form-btn" class="bg-blue-500 text-white px-3 py-1 rounded">+ เพิ่มรูปภาพ (สูงสุด {{ image_formset.max_num }})</button>
-                <p id="image-count" class="text-sm text-gray-600">จำนวนภาพ: <span>0</span> / {{ image_formset.max_num }}</p>
-            </div>
-        </fieldset>
-
-
-        <hr>
-        <h2 class="text-2xl font-bold text-orange-500 mb-4">เสนอราคา</h2>
-        <div class="grid sm:grid-cols-2 gap-6 form-control">
-            <div class="">
-            <label for="{{ listing_form.asking_price.id_for_label }}" class="block text-sm font-medium text-gray-700">ราคาที่ต้องการ</label>
-            <h1 class='text-red-400'>{{ listing_form.asking_price.errors }}</h1>
-            {{ listing_form.asking_price }}
-            </div>
-        </div>
-        <div class="form-control">
-            <div class="">
-            <label for="{{ listing_form.note.id_for_label }}" class="block text-sm font-medium text-gray-700">คำขอเพิ่มเติม</label>
-            <h1 class='text-red-400'>{{ listing_form.note.errors }}</h1>
-            {{ listing_form.note }}
-            </div>
-        </div>
-        <button type="submit" class="w-full py-4 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-yellow-600 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    <span>ยืนยัน</span>
-        </button>
-    </form>
+        </a>
+        {% empty %}
+            <p>ยังไม่มีเสนอขายคอนโด</p>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}
 
 
     
     
 {% block script %}
-    <script>
-            // ใช้ id เหมือนที่ตั้งกับ label
-            const image = document.getElementById('{{ condo_form.deed_picture.id_for_label }}')
-            const preview = document.getElementById('preview')
-            image.addEventListener('change', () => {
-            const [file] = image.files
-            if (file) {
-                preview.src = URL.createObjectURL(file)
-                preview.classList.remove('hidden')
-            }
-            })
-
-document.addEventListener('DOMContentLoaded', function () {
-  const prefix = '{{ image_formset.prefix }}';
-  const container = document.getElementById('form-list');
-  const addBtn = document.getElementById('add-form-btn');
-  const totalFormsInput = document.getElementById('id_' + prefix + '-TOTAL_FORMS');
-  const maxFormsInput = document.getElementById('id_' + prefix + '-MAX_NUM_FORMS');
-  const maxForms = parseInt(maxFormsInput ? maxFormsInput.value : 20, 10) || 20;
-  const imageCountEl = document.querySelector('#image-count span');
-
-  function updateImageCount() {
-    const filled = Array.from(container.querySelectorAll('input[type="file"]'))
-      .filter(i => i.files && i.files.length > 0).length;
-    imageCountEl.textContent = filled;
-  }
-
-  function reindexForms() {
-    const items = Array.from(container.querySelectorAll('.image-form-item'));
-    items.forEach((item, idx) => {
-      item.dataset.index = idx;
-      const numberEl = item.querySelector('.image-number');
-      if (numberEl) numberEl.textContent = idx + 1;
-
-      // Update all name/id attributes that contain prefix-<n>-
-      item.querySelectorAll('[name],[id],[for]').forEach(node => {
-        if (node.name) node.name = node.name.replace(new RegExp(prefix + '-\\d+-'), prefix + '-' + idx + '-');
-        if (node.id) node.id = node.id.replace(new RegExp(prefix + '-\\d+-'), prefix + '-' + idx + '-');
-        if (node.htmlFor) node.htmlFor = node.htmlFor.replace(new RegExp(prefix + '-\\d+-'), prefix + '-' + idx + '-');
-      });
-    });
-
-    // Update TOTAL_FORMS
-    totalFormsInput.value = items.length;
-    updateImageCount();
-  }
-
-  // Setup existing items: show remove for empty extras, attach events
-  function setupItem(item) {
-    item.classList.add('image-form-item');
-    const fileInput = item.querySelector('input[type="file"]');
-    const preview = item.querySelector('.preview-image');
-    const removeBtn = item.querySelector('.remove-form-btn');
-
-    if (!fileInput) return;
-
-    // Show remove button for extra empty forms, hide for persisted with value (server side)
-    if (fileInput.value) {
-      removeBtn.style.display = 'none';
-    } else {
-      removeBtn.style.display = 'block';
-    }
-
-    // change -> preview update
-    fileInput.addEventListener('change', (e) => {
-      const f = fileInput.files && fileInput.files[0];
-      if (f) {
-        preview.src = URL.createObjectURL(f);
-        preview.classList.remove('hidden');
-      } else {
-        preview.src = '';
-        preview.classList.add('hidden');
-      }
-      updateImageCount();
-    });
-
-    // remove handler
-    removeBtn.addEventListener('click', () => {
-      // If form has a DELETE checkbox (modelformset with can_delete), tick it instead of removing DOM
-      const deleteCheckbox = item.querySelector('input[type="checkbox"][name$="-DELETE"]');
-      if (deleteCheckbox) {
-        deleteCheckbox.checked = true;
-        item.style.display = 'none';
-      } else {
-        item.remove();
-        reindexForms();
-      }
-      updateImageCount();
-    });
-  }
-
-  // Initialise existing forms
-  Array.from(container.children).forEach((child) => {
-    setupItem(child);
-  });
-
-  // Template: clone last element or create empty clone from first
-  let formCount = container.children.length;
-  const template = (function () {
-    const first = container.children[0];
-    const clone = first.cloneNode(true);
-    // Clear file input and preview
-    clone.querySelectorAll('input').forEach(i => {
-      if (i.type === 'file') i.value = '';
-      if (i.type === 'checkbox') i.checked = false;
-    });
-    clone.querySelectorAll('.preview-image').forEach(img => {
-      img.src = '';
-      img.classList.add('hidden');
-    });
-    return clone;
-  })();
-
-  addBtn.addEventListener('click', () => {
-    formCount = container.children.length;
-    if (formCount >= maxForms) {
-      alert('ไม่สามารถเพิ่มรูปภาพได้เกิน ' + maxForms + ' รูป');
-      return;
-    }
-    const newForm = template.cloneNode(true);
-
-    // Replace prefix-0- with prefix-<n>- for the cloned HTML attributes
-    newForm.querySelectorAll('[name],[id],[for]').forEach(node => {
-      if (node.name) node.name = node.name.replace(new RegExp(prefix + '-\\d+-'), prefix + '-' + formCount + '-');
-      if (node.id) node.id = node.id.replace(new RegExp(prefix + '-\\d+-'), prefix + '-' + formCount + '-');
-      if (node.htmlFor) node.htmlFor = node.htmlFor.replace(new RegExp(prefix + '-\\d+-'), prefix + '-' + formCount + '-');
-    });
-
-    container.appendChild(newForm);
-    setupItem(newForm);
-    formCount++;
-    totalFormsInput.value = formCount;
-    reindexForms();
-  });
-
-  // Ensure count is correct initially
-  reindexForms();
-})();
-
-</script>
+      <script src="{% static 'search.js' %}"></script>
 {% endblock %}

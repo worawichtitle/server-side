@@ -18,10 +18,13 @@ urlpatterns = [
     path("update_user/<int:user_id>/", views.user_update.as_view(), name="user-update"),
     # ex: /create_condo/  or  {% url 'condo-create' user_id %}
     path("create_condo/", views.condo_create.as_view(), name="condo-create"),
+    # ex: /detail_condo/1/  or  {% url 'condo-detail' deed_number %}
+    path("detail_condo/<deed_number>/", views.condo_detail.as_view(), name="condo-detail"),
     
 
     # ex: /logout/  or  {% url 'logout' %}
     path("logout/", views.logout.as_view(), name="logout"),
+    path("condolist/", views.condo_list.as_view(), name="condo-list"),
 
     # ------STAFF----------------
     # ex: /login_staff/  or  {% url 'staff-login' %}
