@@ -16,8 +16,10 @@ urlpatterns = [
     path("profile_user/<int:user_id>/", views.user_profile.as_view(), name="user-profile"),
     # ex: /update_user/1/  or  {% url 'user-update' user_id %}
     path("update_user/<int:user_id>/", views.user_update.as_view(), name="user-update"),
-    # ex: /create_condo/  or  {% url 'condo-create' user_id %}
+    # ex: /create_condo/  or  {% url 'condo-create' %}
     path("create_condo/", views.condo_create.as_view(), name="condo-create"),
+    # ex: /condo_update/  or  {% url 'condo-update' deed_number %}
+    path("update_condo/<deed_number>/", views.condo_update.as_view(), name="condo-update"),
     # ex: /detail_condo/1/  or  {% url 'condo-detail' deed_number %}
     path("detail_condo/<deed_number>/", views.condo_detail.as_view(), name="condo-detail"),
     # ex: /update_list/1/  or  {% url 'list-update' list_id %}
@@ -26,6 +28,9 @@ urlpatterns = [
     # ex: /logout/  or  {% url 'logout' %}
     path("logout/", views.logout.as_view(), name="logout"),
     path("condolist/", views.condo_list.as_view(), name="condo-list"),
+    # ex: /status_edit/1/  or  {% url 'status-edit' deed_number %}
+    path("status_edit/<deed_number>/", status_edit.as_view(), name="status-edit"),
+    path("status_edit/<deed_number>/cancel/", status_edit.as_view(), name="status-cancel"),
 
     # ------STAFF----------------
     # ex: /login_staff/  or  {% url 'staff-login' %}

@@ -268,6 +268,65 @@ class condo_create(View):
             }
             return render(request, 'user/create_condo.html', context)
         
+class condo_update(View):
+    def get(self, request, deed_number):
+        user_id = request.session.get("user_id")
+        if not user_id:
+            return redirect("user-login")
+        user = User.objects.get(pk=user_id)
+        condo = Condo.objects.get(deed_number=deed_number)
+        listing = CondoListing.objects.filter(condo=condo, user=user).select_related('user').first()
+        if not listing:
+            return redirect("condo-list")
+        
+        condo_form = EditCondoForm(instance=condo)
+        
+        context = {
+            'condo_form': condo_form,
+            'condo': condo,
+            'user': user,
+        }
+        return render(request, 'user/update_condo.html', context)
+
+    def post(self, request, deed_number):
+        user_id = request.session.get("user_id")
+        if not user_id:
+            return redirect("user-login")
+        user = User.objects.get(pk=user_id)
+        condo = Condo.objects.get(deed_number=deed_number)
+
+        condo_form = EditCondoForm(request.POST, request.FILES, instance=condo)
+        if condo.deed_picture:
+            condo_form.fields['deed_picture'].required = False
+
+        
+        print("before")
+        if condo_form.is_valid():
+            try:
+                with transaction.atomic():
+                    print("form valid")
+                    updated_condo = condo_form.save(commit=False)
+                    updated_condo.update_at = timezone.now()
+                    updated_condo.save()
+
+
+                return redirect('condo-detail', condo.deed_number)
+            
+            except Exception as e:
+                print(f"Error during update: {e}")
+                context = {
+                    'condo_form': condo_form,
+                    'condo': condo,
+                    'user': user
+                }
+                return render(request, 'user/update_condo.html', context)
+        print("form invalid")
+        context = {
+            'condo_form': condo_form,
+            'condo': condo,
+            'user': user
+        }
+        return render(request, 'user/update_condo.html', context)
 
 class condo_list(View):
     def get(self, request):
@@ -341,7 +400,8 @@ class condolist_edit(View):
         context = {
             'form': form,
             'listing': listing,
-            'condo_name': listing.condo.name
+            'condo_name': listing.condo.name,
+            'user': listing.user
         }
         return render(request, 'user/update_list.html', context)
 
@@ -361,6 +421,51 @@ class condolist_edit(View):
             'condo_name': listing.condo.name,
         }
         return render(request, 'listing_update.html', context)
+    
+class status_edit(View):
+    def get(self, request, deed_number, **thisiserror):
+        if request.session.get("staff_id") or CondoListing.objects.filter(condo__deed_number=deed_number, user__id=request.session.get("user_id")).exists():
+            condo = Condo.objects.get(deed_number=deed_number)
+            if request.path.endswith('/cancel/'):
+                try:
+                    with transaction.atomic():
+                        condo.status = 'CAL'
+                        condo.save()
+                    return redirect('condo-detail', deed_number)
+                except Exception as e:
+                    print("Cancel error:", e)
+                    return redirect('user-home')
+
+            print(deed_number)
+            form = StatusUpdateForm(instance=condo)
+            context = {
+                'form': form,
+                'deed_number': deed_number,
+                'condo': condo,
+            }
+            context.update(thisiserror)
+            return render(request, 'status_update.html', context)
+        else:
+            return redirect('user-home')
+    def post(self, request, deed_number):
+        condo = Condo.objects.get(deed_number=deed_number)
+        form = StatusUpdateForm(request.POST, instance=condo)
+        try:
+            with transaction.atomic():
+                if form.is_valid():
+                    condo.status = form.cleaned_data['status']
+                    condo.save()
+                    return redirect('condo-list')
+                else:
+                    raise transaction.TransactionManagementError("Error")
+        except Exception as e:
+                print("try error:", e)
+                context = {
+                    'form': form,
+                    'deed_number': deed_number,
+                    'condo': condo,
+                }
+                return render(request, 'status_update.html', context)
 
 class logout(View):
     def get(self, request):

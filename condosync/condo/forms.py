@@ -155,6 +155,28 @@ class CondoForm(forms.ModelForm):
         if not data:
             raise ValidationError("ต้องอัปโหลดรูปภาพสำเนาโฉนด")
         return data
+        
+class EditCondoForm(forms.ModelForm):
+    class Meta:
+        model = Condo
+        fields = ['name', 'province', 'address', 'area_sqm', 'deed_picture', 'description']
+        # ตัวอย่าง widgets
+        widgets = {
+            'province': forms.Select(),
+            'area_sqm': forms.NumberInput(attrs={'min': '0'}),
+            'address': forms.Textarea(attrs={'rows': 3}),
+            'deed_picture': forms.FileInput(attrs={"class": "hidden"}),
+            'description': forms.Textarea(attrs={'rows': 4}),
+        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['province'].empty_label = "--กรุณาเลือกจังหวัด--"
+
+    def clean_area_sqm(self):
+        data = self.cleaned_data.get("area_sqm")
+        if data <= 0:
+            raise ValidationError("พื้นที่ต้องมากกว่า 0 ตารางเมตร")
+        return data
 
 class CondoListingForm(forms.ModelForm):
     class Meta:
@@ -208,7 +230,18 @@ CondoImageFormSet = modelformset_factory(
     fields=['image_url'],
     extra= 3, # เริ่มต้นด้วยฟอร์มเปล่า 3 ฟอร์ม
     max_num=20, # อนุญาตสูงสุด 20 ไฟล์
+    can_delete=True,
 )
+
+class StatusUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Condo
+        fields = ['status']
+        widgets = {
+                'status': forms.Select(attrs={
+                        'class': 'block w-full rounded-md shadow-sm m-1 py-2 px-3'
+                    }),
+            }
 
 # -----------Staff----------------------------
 class StaffForm(forms.ModelForm):

@@ -7,7 +7,7 @@
      <a href="{% url 'condo-list' %}" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600">กลับ</a>
           <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent leading-loose">แก้ไขการจอง ⚙️</h1>
+                    <h1 class="text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent leading-loose">รายละเอียดคอนโด</h1>
                     <p class="text-gray-600 text-lg">ข้อมูลคอนโด: {{ condo.deed_number }}</p>
                 </div>
             </div>
@@ -32,11 +32,13 @@
     <div class="bg-white rounded-xl shadow-xl p-6 mb-8">
         <div class="mb-4 flex justify-between items-center">
             <h1 class="text-4xl font-extrabold text-gray-900">{{ condo.name }}</h1>
-            
-            <a href="{% url 'condo-update' condo.id %}"
+            {% if not condo.status == 'BUY' and not condo.status == 'CAL' and not condo.status == 'FAL' %}
+            <a href="{% url 'condo-update' condo.deed_number %}"
+            {% comment %} <a href="#" {% endcomment %}
             class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg text-sm shadow-md transition duration-300">
                 แก้ไขข้อมูลคอนโด
             </a>
+            {% endif %}
         </div>
         
         <div class="mb-6">
@@ -120,11 +122,12 @@
     <div class="bg-white rounded-xl shadow-xl p-6">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-2xl font-extrabold text-blue-600 mb-4">รายการประกาศขายทั้งหมด</h2>
-
+            {% if not condo.status == 'BUY' and not condo.status == 'CAL' and not condo.status == 'FAL' %}
             <a href="{% url 'list-update' listing.pk %}"
             class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg text-sm shadow-md transition duration-300">
                 แก้ไขข้อมูล
             </a>
+            {% endif %}
         </div>
             <div class="space-y-4">
                     <div class="border-l-4 p-4 rounded-lg 
