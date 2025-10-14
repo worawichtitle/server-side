@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.shortcuts import redirect, render
 from django.http import HttpResponse
 from django.views import View
@@ -214,6 +215,8 @@ class condo_create(View):
                     print('Condo form valid')
                     # 1. บันทึก Condo หลัก
                     new_condo = condo_form.save()
+                    new_condo.deed_number = deed_num
+                    new_condo.save()
                     print('New condo created:', new_condo.id, new_condo.name)
                     # 2. บันทึก CondoListing (ต้องเชื่อมโยงกับ user และ condo)
                     print('Listing form valid')
@@ -306,26 +309,58 @@ class condo_list(View):
         })
     
 class condo_detail(View):
-    # กำหนด Formset ภายใน View เพื่อให้ง่ายต่อการเรียกใช้ (ถ้าไม่ได้กำหนดใน forms.py)
-    # แต่เนื่องจากเรากำหนดแล้วใน forms.py ให้ใช้ที่ import มา
+    def get(self, request, deed_number):
+        if not request.session.get("user_id"):
+            return redirect("user-login")
+        else:
+            if not CondoListing.objects.filter(condo__deed_number=deed_number, user__id=request.session.get("user_id")).exists():
+                return redirect("condo-list")
+            user = User.objects.get(pk=request.session.get("user_id"))
 
-    def get(self, request):
+        listing = CondoListing.objects.filter(condo__deed_number=deed_number, user=user).select_related(
+            'condo', 'condo__province', 'user').prefetch_related('condo__images').first()
+        
+        condo = listing.condo # อ้างอิงถึง Condo ที่เชื่อมโยงกับ Listing นั้น
+
+        context = {
+            'listing': listing,
+            'condo': condo,
+            'user': user,
+        }
+        return render(request, 'user/detail_condo.html', context)
+    
+class condolist_edit(View):
+    def get(self, request, list_id):
         user_id = request.session.get("user_id")
         if not user_id:
             return redirect("user-login")
-        user = User.objects.get(pk=user_id)
-        condo_form = CondoForm()
-        listing_form = CondoListingForm()
-        image_formset = CondoImageFormSet(queryset=CondoImage.objects.none()) 
-        
+        listing = CondoListing.objects.get(pk=list_id)
+        if listing.user.id != user_id:
+            return redirect("user-home")
+        form = CondoListingForm(instance=listing)
         context = {
-            'condo_form': condo_form,
-            'listing_form': listing_form,
-            'image_formset': image_formset,
-            'user_id': user_id,
-            'user': user,
+            'form': form,
+            'listing': listing,
+            'condo_name': listing.condo.name
         }
-        return render(request, 'user/create_condo.html', context)
+        return render(request, 'user/update_list.html', context)
+
+    def post(self, request, list_id):
+        listing = CondoListing.objects.get(pk=list_id)
+        form = CondoListingForm(request.POST, instance=listing)
+        print("get form")
+
+        if form.is_valid():
+            print("form valid")
+            listing.listed_at = timezone.now()
+            form.save()
+            return redirect("condo-detail", deed_number=listing.condo.deed_number)
+        context = {
+            'form': form,
+            'listing': listing,
+            'condo_name': listing.condo.name,
+        }
+        return render(request, 'listing_update.html', context)
 
 class logout(View):
     def get(self, request):

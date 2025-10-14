@@ -51,6 +51,8 @@ Login Staff
                 </button>
             </form>
         </main>
-        {% block script %} <script src="{% static 'showpassword.js' %}"></script> {% endblock %}
         {% endblock %}
+    {% block footer %}
+    {% endblock %}
+{% block script %} <script src="{% static 'showpassword.js' %}"></script> {% endblock %}
 

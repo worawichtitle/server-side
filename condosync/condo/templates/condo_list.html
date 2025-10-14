@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}คอนโดที่ขาย{% endblock %}
+{% block title %}Condo list{% endblock %}
 
  {% block head %}
           <div class="flex items-center justify-between mb-8">
@@ -74,17 +74,23 @@
 <div class="container mx-auto p-4">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold">รายการประกาศคอนโดทั้งหมด</h1>
+        {% if request.session.user_id %}
         <a href="{% url 'condo-create' %}" 
            class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">
             + เพิ่มคอนโด
         </a>
+        {% endif %}
     </div>
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for listing in condo_list %}
+        {% if request.session.user_id %}
+        <a href="{% url 'condo-detail' listing.condo.deed_number %}"
+                class="block bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl hover:border-blue-400 transition duration-300 ease-in-out">
+        {% else %}
         <a href="#"
-        {% comment %} <a href="{% url 'condo-detail' pk=listing.pk %}" {% endcomment %}
-        class="block bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl hover:border-blue-400 transition duration-300 ease-in-out">
+                class="block bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl hover:border-blue-400 transition duration-300 ease-in-out">
+        {% endif %}
             <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
 
                 {% with condo=listing.condo %}
@@ -119,7 +125,7 @@
                                 {% elif condo.status == 'FAL' or condo.status == 'CAL' %}bg-red-100 text-red-700
                                 {% elif condo.status == 'BUY' %}bg-blue-100 text-blue-700
                                 {% elif condo.status == 'CHK' %}bg-yellow-100 text-yellow-700
-                                {% else %}bg-gray-100 text-gray-700{% endif %}">
+                                {% else %}bg-gray-200 text-gray-700{% endif %}">
                                 {{ condo.get_status_display }}
                             </span>
                         </div>
@@ -144,7 +150,9 @@
             </div>
         </a>
         {% empty %}
-            <p>ยังไม่มีเสนอขายคอนโด</p>
+            <div class="col-span-full flex justify-center py-10">
+                <p class="text-xl text-gray-500 font-medium">ยังไม่มีเสนอขายคอนโด</p>
+            </div>
         {% endfor %}
     </div>
 </div>

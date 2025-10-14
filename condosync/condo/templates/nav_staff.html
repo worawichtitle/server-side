@@ -65,10 +65,16 @@
                                         </svg>
                                     </div>
                                     <div>
-                                      {% with user=staff %}
+                                      {% if staff %}
+                                        <p class="font-bold text-gray-800 text-lg">{{ staff.first_name }} {{ staff.last_name }}</p>
+                                        <p class="text-sm text-gray-600 font-medium">@{{ staff.username }}</p>
+                                      {% elif user %}
                                         <p class="font-bold text-gray-800 text-lg">{{ user.first_name }} {{ user.last_name }}</p>
                                         <p class="text-sm text-gray-600 font-medium">@{{ user.username }}</p>
-                                      {% endwith %}
+                                      {% else %}
+                                        <p class="text-red-500 text-sm">ไม่พบข้อมูลผู้ใช้</p>
+                                      {% endif %}
+
                                     </div>
                                 </div>
                             </div>
