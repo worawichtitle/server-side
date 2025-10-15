@@ -68,7 +68,7 @@
         <div class="form-control">
             <div class="">
             <h2 class="text-2xl font-bold text-orange-500 mb-4">รูปโฉนด</h2>
-            <!-- ปุ่มเลือกไฟล์ -->
+            
             <div class="flex justify-center">
               <label for="{{ condo_form.deed_picture.id_for_label }}"
                     class="inline-block cursor-pointer px-5 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400">
@@ -78,7 +78,6 @@
         {% for error in condo_form.deed_picture.errors %}
                 <p class='text-red-500 text-xs mt-2'>{{ error }}</p>
             {% endfor %}
-            {# input ถูกซ่อนด้วย class hidden จาก forms.py #}
             {{ condo_form.deed_picture }}
                 <img id="preview" class="m-auto mt-3 rounded-lg border max-h-[512px] object-contain hidden" alt="Preview" />
             </div>
@@ -185,7 +184,6 @@ document.addEventListener('DOMContentLoaded', function () {
       const numberEl = item.querySelector('.image-number');
       if (numberEl) numberEl.textContent = idx + 1;
 
-      // Update all name/id attributes that contain prefix-<n>-
       item.querySelectorAll('[name],[id],[for]').forEach(node => {
         if (node.name) node.name = node.name.replace(new RegExp(prefix + '-\\d+-'), prefix + '-' + idx + '-');
         if (node.id) node.id = node.id.replace(new RegExp(prefix + '-\\d+-'), prefix + '-' + idx + '-');
@@ -193,12 +191,10 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     });
 
-    // Update TOTAL_FORMS
     totalFormsInput.value = items.length;
     updateImageCount();
   }
 
-  // Setup existing items: show remove for empty extras, attach events
   function setupItem(item) {
     item.classList.add('image-form-item');
     const fileInput = item.querySelector('input[type="file"]');
@@ -207,14 +203,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (!fileInput) return;
 
-    // Show remove button for extra empty forms, hide for persisted with value (server side)
     if (fileInput.value) {
       removeBtn.style.display = 'none';
     } else {
       removeBtn.style.display = 'block';
     }
 
-    // change -> preview update
     fileInput.addEventListener('change', (e) => {
       const f = fileInput.files && fileInput.files[0];
       if (f) {
@@ -227,9 +221,7 @@ document.addEventListener('DOMContentLoaded', function () {
       updateImageCount();
     });
 
-    // remove handler
     removeBtn.addEventListener('click', () => {
-      // If form has a DELETE checkbox (modelformset with can_delete), tick it instead of removing DOM
       const deleteCheckbox = item.querySelector('input[type="checkbox"][name$="-DELETE"]');
       if (deleteCheckbox) {
         deleteCheckbox.checked = true;
@@ -242,17 +234,14 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // Initialise existing forms
   Array.from(container.children).forEach((child) => {
     setupItem(child);
   });
 
-  // Template: clone last element or create empty clone from first
   let formCount = container.children.length;
   const template = (function () {
     const first = container.children[0];
     const clone = first.cloneNode(true);
-    // Clear file input and preview
     clone.querySelectorAll('input').forEach(i => {
       if (i.type === 'file') i.value = '';
       if (i.type === 'checkbox') i.checked = false;
@@ -272,7 +261,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     const newForm = template.cloneNode(true);
 
-    // Replace prefix-0- with prefix-<n>- for the cloned HTML attributes
     newForm.querySelectorAll('[name],[id],[for]').forEach(node => {
       if (node.name) node.name = node.name.replace(new RegExp(prefix + '-\\d+-'), prefix + '-' + formCount + '-');
       if (node.id) node.id = node.id.replace(new RegExp(prefix + '-\\d+-'), prefix + '-' + formCount + '-');
@@ -286,7 +274,6 @@ document.addEventListener('DOMContentLoaded', function () {
     reindexForms();
   });
 
-  // Ensure count is correct initially
   reindexForms();
 })();
 

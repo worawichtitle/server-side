@@ -2,61 +2,50 @@
 {% load custom_filter %}
 {% load static %}
 
-{% block title %} Home {% endblock %}
+{% block title %} หน้าหลักเจ้าหน้าที่ {% endblock %}
 
-  <body class="bg-white text-gray-800">
-    {% comment %} {% include 'nav.html' %} {% endcomment %}
 
-    <main class="p-6 max-w-8xl mx-auto">
-      <section class="mb-6 flex sm:flex-row flex-col gap-4 justify-between">
-        {% block head %} 
-          <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-3xl font-bold text-orange-500">Home</h1>
-          </div>
-        </div>
-        {% comment %} <section aria-label="Filter content" class="sm:self-end sm:place-items-end flex flex-col gap-y-2">
-          <label class="text-2xl font-medium" for="search">Quick Search</label>
-          <div class="flex flex-row gap-x-4 flex-wrap sm:justify-end" aria-label="Advanced Filters">
-            <div aria-label="Full name">
-              {% if filter == '' or filter == None %}
-                <input class="cursor-pointer" type="radio" id="fullname" name="a_filter" value="" checked />
-              {% else %}
-                <input class="cursor-pointer" type="radio" id="fullname" name="a_filter" value="" />
-              {% endif %}
-              <label class="cursor-pointer" for="fullname">Full Name</label>
-            </div>
-            <div aria-label="Faculty">
-              {% if filter == 'faculty' %}
-                <input class="cursor-pointer" type="radio" id="faculty" name="a_filter" value="faculty" checked />
-              {% else %}
-                <input class="cursor-pointer" type="radio" id="faculty" name="a_filter" value="faculty" />
-              {% endif %}
-              <label class="cursor-pointer" for="faculty">Faculty</label>
-            </div>
-          </div>
-          <input 
-          class="block w-[300px] rounded-md field-sizing-content border-[1px] px-4 py-2" 
-          id="search" 
-          type="text" 
-          placeholder="Search professors..." 
-          autocomplete="search" value="{{search}}" 
-          title="Filter data" />
-        </section> {% endcomment %}
-        {% endblock %}
-      </section>
+{% block head %}
+<div class="flex items-center justify-between">
+  <div>
+    <h1 class="text-3xl font-bold text-orange-500">หน้าหลักเจ้าหน้าที่</h1>
+    <p class="text-gray-600 mt-1">ยินดีต้อนรับเข้าสู่ระบบจัดการข้อมูล</p>
+  </div>
+</div>
+{% endblock %}
 
-      <div class="overflow-x-auto bg-white rounded-lg shadow border border-orange-100">
-        {% block content %} 
-        <h1>
-          Hello welcome Staff {{ staff_id }}: {{ staff.username }}
-          {% comment %} {{ user.username }} {% endcomment %}
-        </h1>
-        {% endblock %}
-        
-      </div>
-    </main>
+{% block content %}
+<div class="overflow-x-auto bg-white rounded-xl shadow-md border border-orange-100 p-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h2 class="text-xl font-semibold text-gray-800">สวัสดีคุณ {{ staff.username }}</h2>
+      <p class="text-sm text-gray-500">รหัสเจ้าหน้าที่: {{ staff_id }}</p>
+    </div>
+    <div>
+      <a href="{% url 'logout' %}" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+        ออกจากระบบ
+      </a>
+    </div>
+  </div>
 
-    {% block script %} <script src="{% static 'professor.js' %}"></script> {% endblock %}
-  </body>
-</html>
+  <hr class="my-6 border-t border-orange-200">
+
+  <div class="grid sm:grid-cols-2 lg:grid-cols-2 gap-6">
+    <div class="p-4 bg-blue-50 rounded-lg shadow hover:shadow-md transition">
+      <h3 class="text-lg font-bold text-orange-600 mb-2">ดูรายการคอนโด</h3>
+      <p class="text-sm text-gray-600 mb-4">ตรวจสอบและจัดการข้อมูลคอนโดทั้งหมด</p>
+      <a href="{% url 'condo-list' %}" class="text-blue-600 hover:underline text-sm font-medium">ไปยังรายการคอนโด →</a>
+    </div>
+
+    <div class="p-4 bg-purple-100 rounded-lg shadow hover:shadow-md transition">
+      <h3 class="text-lg font-bold text-orange-600 mb-2">ตั้งค่าบัญชี</h3>
+      <p class="text-sm text-gray-600 mb-4">แก้ไขข้อมูลส่วนตัวและรหัสผ่าน</p>
+      <a href="{% url 'staff-profile' staff_id %}" class="text-blue-600 hover:underline text-sm font-medium">ไปยังโปรไฟล์ →</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'professor.js' %}"></script>
+{% endblock %}

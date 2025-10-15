@@ -1,9 +1,8 @@
 {% extends 'base.html' %}
-{% comment %} {% load custom_filter %} {% endcomment %}
 {% load static %}
 
 {% block title %}
-Login Staff
+เข้าสู่ระบบเจ้าหน้าที่
 {% endblock %}
 
 {% block nav %}
@@ -12,47 +11,51 @@ Login Staff
 {% block head %}
 {% endblock %}
 
-        {% block content %}
-        <main class="p-6 max-w-3xl mx-auto">
-            <div class="flex items-center justify-between mb-2">
-                <h1 class="text-3xl font-bold text-orange-500">Login Staff</h1>
-                <a href="{% url 'staff-regis' %}" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600">Sign Up</a>
-            </div>
-            {% comment %} {% if error %}
-                <h1 class='text-red-400'>{{error}}</h1>
-            {% endif %} {% endcomment %}
+{% block content %}
+<main class="max-w-lg mx-auto p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-3xl font-bold text-orange-500">เข้าสู่ระบบเจ้าหน้าที่</h1>
+    <a href="{% url 'staff-regis' %}" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition duration-200">
+      สมัครสมาชิก
+    </a>
+  </div>
 
-            <form method="post" class="space-y-6">
-                {% csrf_token %}
+  <form method="post" class="bg-white rounded-xl shadow-md p-6 space-y-6 form-control">
+    {% csrf_token %}
 
-                <h1 class='text-red-400'>{{ form.non_field_errors }}</h1>
-                <div class="space-y-4 border p-4 rounded-md shadow-sm">
-                    <h2 class="text-xl font-semibold text-gray-700">Login</h2>
-                    <div class="border rounded-md p-4 mb-4 bg-orange-50">
-                        <div>
-                            <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700">Username/Email</label>
-                            {{ form.username }}
-                        </div>
-    
-                        <div>
-                        <label for="{{ form.password_hash.id_for_label }}" class="block text-sm font-medium text-gray-700">Password</label>
-                            {{ form.password_hash }}
-                            <button type="button" onclick="showPassword(event, 'password_hash')" class="ml-2 px-2 py-1 rounded bg-orange-200 text-orange-700">Show</button>
-                        </div>
+    {% if form.non_field_errors %}
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <strong class="font-bold">เกิดข้อผิดพลาด:</strong>
+        <span class="block sm:inline">{{ form.non_field_errors }}</span>
+      </div>
+    {% endif %}
 
-                    </div>
-                </div>
+    <div>
+      <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700">ชื่อผู้ใช้หรืออีเมล</label>
+      {{ form.username }}
+    </div>
 
+    <div>
+      <div class="flex justify-between items-center gap-2">
+        <label for="{{ form.password_hash.id_for_label }}" class="block text-sm font-medium text-gray-700">รหัสผ่าน</label>
+        <button type="button" onclick="showPassword(event, 'password_hash')" class="px-3 py-1 rounded bg-orange-200 text-orange-700 text-sm hover:bg-orange-300 transition">
+          แสดง
+        </button>
+      </div>
+      {{ form.password_hash }}
+    </div>
 
-                <button
-                    type="submit"
-                    class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-2 rounded-md">
-                    Login
-                </button>
-            </form>
-        </main>
-        {% endblock %}
-    {% block footer %}
-    {% endblock %}
-{% block script %} <script src="{% static 'showpassword.js' %}"></script> {% endblock %}
+    <button type="submit"
+      class="w-full py-3 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-semibold rounded-lg hover:from-orange-600 hover:to-yellow-600 shadow-md hover:shadow-lg transition duration-300">
+      เข้าสู่ระบบ
+    </button>
+  </form>
+</main>
+{% endblock %}
 
+{% block footer %}
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'showpassword.js' %}"></script>
+{% endblock %}

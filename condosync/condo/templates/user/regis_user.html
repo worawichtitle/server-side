@@ -3,7 +3,7 @@
 {% load static %}
 
 {% block title %}
-Register User
+สมัครสมาชิกผู้ใช้
 {% endblock %}
 
 {% block nav %}
@@ -15,21 +15,21 @@ Register User
 {% block content %}
   <div class="p-6 max-w-3xl mx-auto">
     <div class="flex items-center justify-between mb-2">
-      <h1 class="text-3xl font-bold text-orange-500">Sign up USER</h1>
-      <a href="{% url 'user-login' %}" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600">Login</a>
+      <h1 class="text-3xl font-bold text-orange-500">สมัครสมาชิกผู้ใช้</h1>
+      <a href="{% url 'user-login' %}" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600">เข้าสู่ระบบ</a>
     </div>
-    <p class="text-gray-400 mb-6">กรอกข้อมูลของคุณเพื่อการซื้อขายเร็วขึ้น</p>
+    <p class="text-gray-400 mb-6">กรอกข้อมูลของคุณเพื่อให้การซื้อขายสะดวกรวดเร็วยิ่งขึ้น</p>
     {% if error %}
-      <h1 class='text-red-400'>error: {{error}}</h1>
+      <h1 class='text-red-400'>ข้อผิดพลาด: {{ error }}</h1>
     {% endif %}
 
-    <!-- ตรง action แก้เป็น url ของตัวเองด้วย -->
     <form method="post" action="" class="space-y-5 bg-white p-6 rounded-xl border border-orange-100 shadow" enctype="multipart/form-data">
       {% csrf_token %}
       <h1 class='text-red-400'>{{ pwform.non_field_errors }}</h1>
+
       <div class="form-control">
         <div>
-          <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700">Username</label>
+          <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700">ชื่อผู้ใช้</label>
           <h1 class='text-red-400'>{{ form.username.errors }}</h1>
           {{ form.username }}
         </div>
@@ -37,27 +37,27 @@ Register User
 
       <div class="grid sm:grid-cols-2 gap-4 form-control">
         <div class="relative">
-          <label for="{{ pwform.password_hash.id_for_label }}" class="block text-sm font-medium text-gray-700">Password</label>
+          <label for="{{ pwform.password_hash.id_for_label }}" class="block text-sm font-medium text-gray-700">รหัสผ่าน</label>
           <h1 class='text-red-400'>{{ pwform.password_hash.errors }}</h1>
           {{ pwform.password_hash }}
-          <button type="button" class="absolute right-2 top-9 text-xs px-2 py-1 bg-gray-200 rounded show-password-btn" onclick="showPassword(event, 'password_hash')">Show</button>
+          <button type="button" class="absolute right-2 top-9 text-xs px-2 py-1 bg-gray-200 rounded show-password-btn" onclick="showPassword(event, 'password_hash')">แสดง</button>
         </div>
         <div class="relative">
-          <label for="{{ pwform.confirm_password.id_for_label }}" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+          <label for="{{ pwform.confirm_password.id_for_label }}" class="block text-sm font-medium text-gray-700">ยืนยันรหัสผ่าน</label>
           <h1 class='text-red-400'>{{ pwform.confirm_password.errors }}</h1>
           {{ pwform.confirm_password }}
-          <button type="button" class="absolute right-2 top-9 text-xs px-2 py-1 bg-gray-200 rounded show-password-btn" onclick="showPassword(event, 'confirm_password')">Show</button>
+          <button type="button" class="absolute right-2 top-9 text-xs px-2 py-1 bg-gray-200 rounded show-password-btn" onclick="showPassword(event, 'confirm_password')">แสดง</button>
         </div>
       </div>
 
       <div class="grid sm:grid-cols-2 gap-4 form-control">
         <div>
-          <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700">First Name</label>
+          <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700">ชื่อจริง</label>
           <h1 class='text-red-400'>{{ form.first_name.errors }}</h1>
           {{ form.first_name }}
         </div>
         <div>
-          <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700">Last Name</label>
+          <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700">นามสกุล</label>
           <h1 class='text-red-400'>{{ form.last_name.errors }}</h1>
           {{ form.last_name }}
         </div>
@@ -65,40 +65,44 @@ Register User
 
       <div class="grid sm:grid-cols-2 gap-4 form-control">
         <div>
-          <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700">Email</label>
-           <h1 class='text-red-400'>{{form.email.errors}}</h1> {% comment %} แสดง error ของ email {% endcomment %}
+          <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700">อีเมล</label>
+          <h1 class='text-red-400'>{{ form.email.errors }}</h1>
           {{ form.email }}
         </div>
         <div>
-          <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-gray-700">Phone</label>
-          <h1 class='text-red-400'>{{form.phone.errors}}</h1>
+          <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-gray-700">เบอร์โทรศัพท์</label>
+          <h1 class='text-red-400'>{{ form.phone.errors }}</h1>
           {{ form.phone }}
         </div>
       </div>
+
       <div class="form-control">
         <div>
-          <label for="{{ form.main_contact.id_for_label }}" class="block text-sm font-medium text-gray-700">Main Contact</label>
-          <h1 class='text-red-400'>{{form.main_contact.errors}}</h1>
+          <label for="{{ form.main_contact.id_for_label }}" class="block text-sm font-medium text-gray-700">ช่องทางติดต่อหลัก</label>
+          <h1 class='text-red-400'>{{ form.main_contact.errors }}</h1>
           {{ form.main_contact }}
         </div>
       </div>
 
       <div class="form-control">
         <div>
-          <label for="{{ form.address.id_for_label }}" class="block text-sm font-medium text-gray-700">Address</label>
-          <h1 class='text-red-400'>{{form.address.errors}}</h1>
+          <label for="{{ form.address.id_for_label }}" class="block text-sm font-medium text-gray-700">ที่อยู่</label>
+          <h1 class='text-red-400'>{{ form.address.errors }}</h1>
           {{ form.address }}
         </div>
       </div>
 
       <div class="flex items-center justify-end gap-3 pt-2">
-        <button type="reset" class="px-4 py-2 rounded-lg border">Cancel</button>
-        <button type="submit" class="px-5 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600">Sign Up</button>
+        <button type="reset" class="px-4 py-2 rounded-lg border">ยกเลิก</button>
+        <button type="submit" class="px-5 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600">สมัครสมาชิก</button>
       </div>
     </form>
   </div>
-  {% endblock %}
-  {% block footer %}
-  {% endblock %}
-  {% block script %} <script src="{% static 'showpassword.js' %}"></script> {% endblock %}
+{% endblock %}
 
+{% block footer %}
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'showpassword.js' %}"></script>
+{% endblock %}

@@ -7,10 +7,22 @@
      <a href="{% url 'condo-list' %}" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600">กลับ</a>
           <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent leading-loose">รายละเอียดข้อมูลคอนโด</h1>
+                    <h1 class="text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent leading-loose">รายละเอียดคอนโด</h1>
                     <p class="text-gray-600 text-lg">ข้อมูลคอนโด: {{ condo.deed_number }}</p>
                 </div>
             </div>
+{% endblock %}
+
+{% block style %}
+<style>
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+</style>
 {% endblock %}
 
 
@@ -18,21 +30,41 @@
     <div class="container mx-auto p-6">
     
     <div class="bg-white rounded-xl shadow-xl p-6 mb-8">
+        <div class="mb-4 flex justify-between items-center">
+            <h1 class="text-4xl font-extrabold text-gray-900">{{ condo.name }}</h1>
+            <a href="{% url 'staff-cupdate' condo.deed_number %}"
+            {% comment %} <a href="#" {% endcomment %}
+            class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg text-sm shadow-md transition duration-300">
+                เปลี่ยนสถานะคอนโด
+            </a>
+        </div>
         
         <div class="mb-6">
-            <h2 class="text-2xl font-semibold mb-3">รูปภาพประกอบ</h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <h2 class="text-l font-semibold mb-3">รูปภาพประกอบ</h2>
+            
+            <div class="flex space-x-4 overflow-x-auto p-2 -m-2 snap-x hide-scrollbar">
                 {% for image in condo.images.all %}
-                    <img src="{{ image.image_url.url }}" alt="{{ condo.name }} Image" 
-                         class="w-full h-32 object-cover rounded-lg shadow-sm cursor-pointer hover:opacity-90 transition"
-                         onclick="openModal('{{ image.image_url.url }}')">
+                    
+                    <div class="flex-shrink-0 w-64 h-40 snap-center bg-gray-100 rounded-xl shadow-lg overflow-hidden">
+                        <img src="{{ image.image_url.url }}" alt="{{ condo.name }} Image {{ forloop.counter }}" 
+                            class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
+                            onclick="openModal('{{ image.image_url.url }}')">
+                    </div>
+                    
                 {% empty %}
-                    <p class="text-gray-500 col-span-4">คอนโดนี้ยังไม่มีรูปภาพประกอบ</p>
+                    <p class="text-gray-500 w-full text-center py-4">คอนโดนี้ยังไม่มีรูปภาพประกอบ</p>
                 {% endfor %}
             </div>
         </div>
-        
-        <h1 class="text-4xl font-extrabold text-gray-900 mb-2">{{ condo.name }}</h1>
+
+        <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-80 hidden z-50 flex justify-center items-center p-4" onclick="closeModal()">
+            <div class="relative max-w-4xl max-h-full" onclick="event.stopPropagation()">
+                <img id="modalImage" src="" alt="Full Image" class="max-w-full max-h-screen object-contain rounded-lg">
+                <button class="absolute top-4 right-4 text-white text-4xl hover:text-gray-300 transition" onclick="closeModal()">
+                    &times;
+                </button>
+            </div>
+        </div>
         
         <div class="flex items-center space-x-4 mb-4">
             <p class="text-lg font-medium text-gray-700">
@@ -59,11 +91,20 @@
             <div>
                 <p class="mb-2"><span class="font-semibold text-gray-900">จังหวัด:</span> {{ condo.province.name }}</p>
                 <p class="mb-2"><span class="font-semibold text-gray-900">พื้นที่ (ตรม.):</span> {{ condo.area_sqm|floatformat:2 }} ตร.ม.</p>
-                <p class="mb-2"><span class="font-semibold text-gray-900">สถานะ:</span> <span class="font-bold text-lg text-blue-600">{{ condo.get_status_display }}</span></p>
+                <p class="mb-2 flex items-center gap-2"><span class="font-semibold text-gray-900">สถานะ:</span> 
+                    <span class="text-xl font-medium px-2 py-0.5 rounded-full 
+                        {% if condo.status == 'PAS' %}bg-green-100 text-green-700
+                        {% elif condo.status == 'FAL' or condo.status == 'CAL' %}bg-red-100 text-red-700
+                        {% elif condo.status == 'BUY' %}bg-blue-100 text-blue-700
+                        {% elif condo.status == 'CHK' %}bg-yellow-100 text-yellow-700
+                        {% else %}bg-gray-200 text-gray-700{% endif %}">
+                        {{ condo.get_status_display }}
+                    </span></p>
             </div>
             <div>
-                <p class="mb-2"><span class="font-semibold text-gray-900">ที่อยู่โดยประมาณ:</span> {{ condo.address }}</p>
+                <p class="mb-2"><span class="font-semibold text-gray-900">ที่อยู่:</span> {{ condo.address }}</p>
                 <p class="mb-2"><span class="font-semibold text-gray-900">สร้างเมื่อ:</span> {{ condo.create_at|date:"d M Y" }}</p>
+                <p class="mb-2"><span class="font-semibold text-gray-900">อัพเดทเมื่อ:</span> {{ condo.update_at|date:"d M Y" }}</p>
             </div>
         </div>
         
@@ -74,12 +115,14 @@
         
     </div>
 
-    <div class="bg-white rounded-xl shadow-xl p-6">
-        <h2 class="text-2xl font-extrabold text-blue-600 mb-4">รายการประกาศขายทั้งหมด</h2>
-        
-        {% if related_listings %}
-            <div class="space-y-4">
-                {% for listing_item in related_listings %}
+    <div class="bg-white rounded-xl shadow-xl p-6 mb-8">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-extrabold text-blue-600 mb-4">รายการประกาศขายทั้งหมด</h2>
+        </div>
+        {% if listings %}
+            <div class="space-y-6">
+                {% for listing in listings %}
+                    <a href="{% url 'user-profile' listing.user.id %}" class="block">
                     <div class="border-l-4 p-4 rounded-lg 
                                 {% if listing.pk == listing.pk %}border-blue-500 bg-blue-50{% else %}border-gray-200 bg-gray-50{% endif %}">
                         
@@ -93,22 +136,40 @@
                         </div>
                         
                         <p class="text-gray-600 text-sm mt-1">
-                            {% if listing.pk == listing.pk %}
-                                📌 *นี่คือประกาศที่คุณคลิกเข้ามา*
-                            {% endif %}
-                            ลงประกาศเมื่อ: {{ listing.listed_at|date:"d M Y H:i" }}
+                            📌 ลงประกาศเมื่อ: {{ listing.listed_at|date:"d M Y H:i" }}
                         </p>
                         {% if listing.note %}
                             <p class="text-gray-700 mt-2 italic text-sm">หมายเหตุผู้ขาย: "{{ listing.note }}"</p>
                         {% endif %}
                     </div>
+                    </a>
                 {% endfor %}
             </div>
         {% else %}
-            <p class="text-gray-500">คอนโดนี้ยังไม่มีรายการประกาศขาย</p>
+            <div class="col-span-full flex justify-center py-10">
+                <p class="text-xl text-gray-500 font-medium">ยังไม่มีรายการประกาศขายสำหรับคอนโดนี้</p>
+            </div>
         {% endif %}
     </div>
 
+    <div class="bg-white rounded-xl shadow-xl p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-extrabold text-blue-600 mb-4">บันทึกรายงาน</h2>
+            <a href="{% url 'staff-report' condo.deed_number %}"
+            class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg text-sm shadow-md transition duration-300">
+                เขียนรายงาน
+            </a>
+        </div>
+        {% if report %}
+            <div class="space-y-6">
+                {{ report.report }}
+            </div>
+        {% else %}
+            <div class="col-span-full flex justify-center py-10">
+                <p class="text-xl text-gray-500 font-medium">ยังไม่มีรายงานคอนโดนี้</p>
+            </div>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}
 
@@ -117,26 +178,35 @@
     
 {% block script %}
 <script>
+    const toggleBtn = document.getElementById('toggleDeedBtn');
+    const deedContainer = document.getElementById('deedPictureContainer');
+    const imageModal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
     document.addEventListener('DOMContentLoaded', function() {
-        const toggleBtn = document.getElementById('toggleDeedBtn');
-        const deedContainer = document.getElementById('deedPictureContainer');
-
         toggleBtn.addEventListener('click', function() {
             const isHidden = deedContainer.classList.contains('hidden');
             
             if (isHidden) {
                 deedContainer.classList.remove('hidden');
                 toggleBtn.textContent = 'ซ่อนรูปโฉนด';
-                toggleBtn.classList.remove('bg-blue-500');
-                toggleBtn.classList.add('bg-red-500');
+                toggleBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                toggleBtn.classList.add('bg-red-500', 'hover:bg-red-600');
             } else {
                 deedContainer.classList.add('hidden');
                 toggleBtn.textContent = 'แสดงรูปโฉนด';
-                toggleBtn.classList.remove('bg-red-500');
-                toggleBtn.classList.add('bg-blue-500');
+                toggleBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+                toggleBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
             }
         });
     });
+    function openModal(imageUrl) {
+        modalImage.src = imageUrl;
+        imageModal.classList.remove('hidden');
+    }
 
+    function closeModal() {
+        imageModal.classList.add('hidden');
+        modalImage.src = '';
+    }
 </script>
 {% endblock %}

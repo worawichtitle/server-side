@@ -45,20 +45,10 @@ urlpatterns = [
     path("profile_staff/<int:staff_id>/", views.staff_profile.as_view(), name="staff-profile"),
     # ex: /update_staff/1/  or  {% url 'staff-update' staff_id %}
     path("update_staff/<int:staff_id>/", views.staff_update.as_view(), name="staff-update"),
-
-
-    # # ex: /registration/professor/
-    # path("professor/", views.professor_list.as_view(), name="professor-list"),
-    # # ex: /registration/faculty/
-    # path("faculty/", views.faculty_list.as_view(), name="faculty-list"),
-    # # ex: /registration/course/
-    # path("course/", views.course_list.as_view(), name="course-list"),
-    # # ex: /registration/create_student/
-    # path("create_student/", views.create_student.as_view(), name="create-student"),
-    # # ex: {% url 'update-student' student.student_id %}
-    # path("update_student/<int:student_id>/", views.update_student.as_view(), name="update-student"),
-    # # ex: /registration/create_course/
-    # path("create_course/", views.create_course.as_view(), name="create-course"),
-    # # ex: {% url 'update-course' course.course_code %}
-    # path("update_course/<course_code>/", views.update_course.as_view(), name="update-course"),
+    # ex: /detail_condo_staff/1/  or  {% url 'staff-cdetail' deed_number %}
+    path("detail_condo_staff/<deed_number>/", views.staff_cdetail.as_view(), name="staff-cdetail"),
+    # ex: /update_condo_staff/1/  or  {% url 'staff-cupdate' deed_number %}
+    path("update_condo_staff/<deed_number>/", views.status_edit.as_view(), name="staff-cupdate"),
+    # ex: /report_staff/1/  or  {% url 'staff-report' deed_number %}
+    path("report_staff/<deed_number>/", views.staff_report.as_view(), name="staff-report"),
 ]

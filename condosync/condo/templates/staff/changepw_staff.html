@@ -7,26 +7,25 @@ Change Password Staff
 {% endblock %}
 
 {% block head %}
-  <a href="{% url 'staff-profile' staff_id %}" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600">Back</a>
+  <a href="{% url 'staff-profile' staff_id %}" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600">กลับ</a>
 {% endblock %}
 
 {% block content %}
   <div class="p-6 max-w-3xl mx-auto">
     <div class="flex items-center justify-between mb-2">
-      <h1 class="text-3xl font-bold text-orange-500">Set new password</h1>
+      <h1 class="text-3xl font-bold text-orange-500">ตั้งรหัสผ่านใหม่</h1>
     </div>
     <p class="text-gray-400 mb-6">กรอกรหัสผ่านใหม่ เพื่อเปลี่ยนรหัส</p>
     {% if error %}
       <h1 class='text-red-400'>error: {{error}}</h1>
     {% endif %}
 
-    <!-- ตรง action แก้เป็น url ของตัวเองด้วย -->
     <form method="post" action="" class="space-y-5 bg-white p-6 rounded-xl border border-orange-100 shadow" enctype="multipart/form-data">
       {% csrf_token %}
       <h1 class='text-red-400'>{{ form.non_field_errors }}</h1>
       <div class="form-control">
         <div class="relative">
-          <label for="{{ form.password_old.id_for_label }}" class="block text-sm font-medium text-gray-700">Current Password</label>
+          <label for="{{ form.password_old.id_for_label }}" class="block text-sm font-medium text-gray-700">รหัสปัจจุบัน</label>
           <h1 class='text-red-400'>{{ form.password_old.errors }}</h1>
           {{ form.password_old }}
           <button type="button" class="absolute right-2 top-9 text-xs px-2 py-1 bg-gray-200 rounded show-password-btn" onclick="showPassword(event, 'password_old')">Show</button>
@@ -35,7 +34,7 @@ Change Password Staff
       <hr>
       <div class="form-control">
         <div class="relative">
-          <label for="{{ form.password_hash.id_for_label }}" class="block text-sm font-medium text-gray-700">New Password</label>
+          <label for="{{ form.password_hash.id_for_label }}" class="block text-sm font-medium text-gray-700">รหัสใหม่</label>
           <h1 class='text-red-400'>{{ form.password_hash.errors }}</h1>
           {{ form.password_hash }}
           <button type="button" class="absolute right-2 top-9 text-xs px-2 py-1 bg-gray-200 rounded show-password-btn" onclick="showPassword(event, 'password_hash')">Show</button>
@@ -43,7 +42,7 @@ Change Password Staff
       </div>
       <div class="form-control">
         <div class="relative">
-          <label for="{{ form.confirm_password.id_for_label }}" class="block text-sm font-medium text-gray-700">Confirm New Password</label>
+          <label for="{{ form.confirm_password.id_for_label }}" class="block text-sm font-medium text-gray-700">ยืนยันรหัสใหม่</label>
           <h1 class='text-red-400'>{{ form.confirm_password.errors }}</h1>
           {{ form.confirm_password }}
           <button type="button" class="absolute right-2 top-9 text-xs px-2 py-1 bg-gray-200 rounded show-password-btn" onclick="showPassword(event, 'confirm_password')">Show</button>
@@ -51,8 +50,8 @@ Change Password Staff
       </div>
 
       <div class="flex items-center justify-end gap-3 pt-2">
-        <a href="{% url 'staff-profile' staff.id %}" class="px-4 py-2 rounded-lg border">Cancel</a>
-        <button type="submit" class="px-5 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600">Confirm</button>
+        <a href="{% url 'staff-profile' staff.id %}" class="px-4 py-2 rounded-lg border">ยกเลิก</a>
+        <button type="submit" class="px-5 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600">ยืนยัน</button>
       </div>
     </form>
   </div>

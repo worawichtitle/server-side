@@ -171,8 +171,6 @@ class user_update(View):
                 return render(request, 'user/update_user.html', context)
         
 class condo_create(View):
-    # กำหนด Formset ภายใน View เพื่อให้ง่ายต่อการเรียกใช้ (ถ้าไม่ได้กำหนดใน forms.py)
-    # แต่เนื่องจากเรากำหนดแล้วใน forms.py ให้ใช้ที่ import มา
 
     def get(self, request):
         user_id = request.session.get("user_id")
@@ -199,8 +197,7 @@ class condo_create(View):
         listing_form = CondoListingForm(request.POST)
         image_formset = CondoImageFormSet(request.POST, request.FILES, queryset=CondoImage.objects.none())
         
-        
-        # ตรวจสอบความถูกต้องของทุกฟอร์ม
+
         if condo_form.is_valid() and listing_form.is_valid() and image_formset.is_valid():
             try:
                 with transaction.atomic():
@@ -209,31 +206,29 @@ class condo_create(View):
                         condo = Condo.objects.get(deed_number=deed_num)
                         new_listing = listing_form.save(commit=False)
                         new_listing.condo = condo
-                        new_listing.user = user # กำหนด Foreign Key ไปที่ผู้ใช้ที่ล็อกอินอยู่
+                        new_listing.user = user
                         new_listing.save()
                         return redirect('condo-list')
                     print('Condo form valid')
-                    # 1. บันทึก Condo หลัก
+
                     new_condo = condo_form.save()
                     new_condo.deed_number = deed_num
                     new_condo.save()
                     print('New condo created:', new_condo.id, new_condo.name)
-                    # 2. บันทึก CondoListing (ต้องเชื่อมโยงกับ user และ condo)
+
                     print('Listing form valid')
                     new_listing = listing_form.save(commit=False)
                     new_listing.condo = new_condo
-                    new_listing.user = user # กำหนด Foreign Key ไปที่ผู้ใช้ที่ล็อกอินอยู่
+                    new_listing.user = user
                     new_listing.save()
                     print('New listing created:', new_listing.id, new_listing.condo.name, new_listing.user.username)
-                    # 3. บันทึก CondoImage Formset
+
                     print('Image formset valid')
                     for form in image_formset:
-                        # ตรวจสอบว่ามีการอัปโหลดไฟล์ในช่องนั้นๆ จริงหรือไม่
                         if form.cleaned_data and form.cleaned_data.get('image_url'):
                             condo_image = form.save(commit=False)
-                            condo_image.condo = new_condo  # เชื่อมโยงกับ Condo ที่สร้างใหม่
+                            condo_image.condo = new_condo
                             
-                            # กำหนด image_name จากชื่อไฟล์ที่อัปโหลด
                             uploaded_file = form.cleaned_data.get('image_url')
                             condo_image.image_name = uploaded_file.name 
                             
@@ -241,9 +236,7 @@ class condo_create(View):
                     return redirect('condo-list')
 
             except Exception as e:
-                # จัดการข้อผิดพลาด
                 print(f"Error during save: {e}")
-                # อาจจะเพิ่มข้อความ error ให้ผู้ใช้เห็น
                 context = {
                     'condo_form': condo_form,
                     'listing_form': listing_form,
@@ -258,7 +251,6 @@ class condo_create(View):
             print("Listing form errors:", listing_form.errors)
             print("Image formset errors:", image_formset.errors)
             print("Image formset non-field errors:", image_formset.non_form_errors())
-            # หากมีข้อผิดพลาดในการตรวจสอบความถูกต้อง
             context = {
                 'condo_form': condo_form,
                 'listing_form': listing_form,
@@ -379,7 +371,7 @@ class condo_detail(View):
         listing = CondoListing.objects.filter(condo__deed_number=deed_number, user=user).select_related(
             'condo', 'condo__province', 'user').prefetch_related('condo__images').first()
         
-        condo = listing.condo # อ้างอิงถึง Condo ที่เชื่อมโยงกับ Listing นั้น
+        condo = listing.condo
 
         context = {
             'listing': listing,
@@ -427,6 +419,7 @@ class status_edit(View):
         if request.session.get("staff_id") or CondoListing.objects.filter(condo__deed_number=deed_number, user__id=request.session.get("user_id")).exists():
             condo = Condo.objects.get(deed_number=deed_number)
             if request.path.endswith('/cancel/'):
+                # User
                 try:
                     with transaction.atomic():
                         condo.status = 'CAL'
@@ -435,7 +428,7 @@ class status_edit(View):
                 except Exception as e:
                     print("Cancel error:", e)
                     return redirect('user-home')
-
+            # Staff
             print(deed_number)
             form = StatusUpdateForm(instance=condo)
             context = {
@@ -444,7 +437,7 @@ class status_edit(View):
                 'condo': condo,
             }
             context.update(thisiserror)
-            return render(request, 'status_update.html', context)
+            return render(request, 'staff/update_condo.html', context)
         else:
             return redirect('user-home')
     def post(self, request, deed_number):
@@ -632,3 +625,77 @@ class staff_update(View):
                 }
                 return render(request, 'staff/update_staff.html', context)
 
+class staff_cdetail(View):
+    def get(self, request, deed_number):
+        if not request.session.get("staff_id"):
+            return redirect("staff-login")
+        else:
+            user = Staff.objects.get(pk=request.session.get("staff_id"))
+        condo = Condo.objects.get(deed_number=deed_number)
+        listings = CondoListing.objects.filter(condo=condo).select_related(
+            'user').prefetch_related('condo__images')
+        report = CondoReport.objects.filter(condo=condo).first()
+
+        context = {
+            'listings': listings,
+            'condo': condo,
+            'report': report,
+            'user': user,
+        }
+        return render(request, 'staff/detail_condo.html', context)
+    
+class staff_report(View):
+    def get(self, request, deed_number):
+        if not request.session.get("staff_id"):
+            return redirect("staff-login")
+        else:
+            user = Staff.objects.get(pk=request.session.get("staff_id"))
+        condo = Condo.objects.get(deed_number=deed_number)
+        report = CondoReport.objects.filter(condo=condo).first()
+        form = StaffReportForm(instance=report)
+        context = {
+            'form': form,
+            'condo': condo,
+            'report': report,
+            'user': user,
+        }
+        return render(request, 'staff/report_staff.html', context)
+    def post(self, request, deed_number):
+        staff_id = request.session.get("staff_id")
+        if not staff_id:
+            return redirect("staff-login")
+        user = Staff.objects.get(pk=staff_id)
+        condo = Condo.objects.get(deed_number=deed_number)
+        report = CondoReport.objects.filter(condo=condo).first()
+
+        form = StaffReportForm(request.POST, instance=report)
+
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    report = form.save(commit=False)
+                    report.update_at = timezone.now()
+                    report.condo = condo
+                    report.save()
+
+                    if not report.author.filter(pk=user.pk).exists():
+                        report.author.add(user)
+                    
+                return redirect('staff-cdetail', deed_number=deed_number)
+            except Exception as e:
+                print("Error saving report:", e)
+                context = {
+                    'form': form,
+                    'condo': condo,
+                    'report': report,
+                    'user': user,
+                }
+                return render(request, 'staff/report_staff.html', context)
+
+        context = {
+            'form': form,
+            'condo': condo,
+            'report': report,
+            'user': user,
+        }
+        return render(request, 'staff/report_staff.html', context)

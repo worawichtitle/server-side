@@ -88,7 +88,7 @@
         <a href="{% url 'condo-detail' listing.condo.deed_number %}"
                 class="block bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl hover:border-blue-400 transition duration-300 ease-in-out">
         {% else %}
-        <a href="#"
+        <a href="{% url 'staff-cdetail' listing.condo.deed_number %}"
                 class="block bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl hover:border-blue-400 transition duration-300 ease-in-out">
         {% endif %}
             <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">

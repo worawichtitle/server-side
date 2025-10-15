@@ -7,51 +7,48 @@ Staff Profile
 {% endblock %}
 
 {% block head %}
-  <a href="{% url 'staff-home' %}" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600">Back</a>
+  <a href="{% url 'staff-home' %}" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600">กลับ</a>
 {% endblock %}
 
 {% block content %}
 <div class="p-6 max-w-3xl mx-auto">
-  <h1 class="text-3xl font-bold text-orange-500 mb-4">Staff Profile ID: {{staff_id}}</h1>
+  <h1 class="text-3xl font-bold text-orange-500 mb-4">รหัสไอดีพนักงาน: {{staff_id}}</h1>
   <div class="bg-white p-6 rounded-xl border border-orange-100 shadow space-y-4">
     <div class="flex justify-between">
-      <span class="font-semibold text-gray-700">Username</span>
+      <span class="font-semibold text-gray-700">ชื่อผู้ใช้</span>
       <span class="text-gray-900">{{ staff.username }}</span>
     </div>
     <hr>
     <div class="flex justify-between">
-      <span class="font-semibold text-gray-700">First Name</span>
+      <span class="font-semibold text-gray-700">ชื่อจริง</span>
       <span class="text-gray-900">{{ staff.first_name }}</span>
     </div>
     <hr>
     <div class="flex justify-between">
-      <span class="font-semibold text-gray-700">Last Name</span>
+      <span class="font-semibold text-gray-700">นามสกุล</span>
       <span class="text-gray-900">{{ staff.last_name }}</span>
     </div>
     <hr>
     <div class="flex justify-between">
-      <span class="font-semibold text-gray-700">Email</span>
+      <span class="font-semibold text-gray-700">อีเมล</span>
       <span class="text-gray-900">{{ staff.email }}</span>
     </div>
     <hr>
     <div class="flex justify-between">
-      <span class="font-semibold text-gray-700">Phone</span>
+      <span class="font-semibold text-gray-700">เบอร์โทรศัพท์</span>
       <span class="text-gray-900">{{ staff.phone }}</span>
     </div>
     <hr>
     <div class="flex justify-between">
-      <span class="font-semibold text-gray-700">Role</span>
+      <span class="font-semibold text-gray-700">ตำแหน่งงาน</span>
       <span class="text-gray-900">{{ staff.role.name }}</span>
     </div>
   </div>
   {% if request.session.staff_id == staff_id %}
   <div class="flex items-center justify-end gap-3 pt-2">
-    <a href="{% url 'staff-changepw' staff_id %}" class="px-5 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600">Change Password</a>
-    <a href="{% url 'staff-update' staff_id %}" class="px-5 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600">Edit</a>
+    <a href="{% url 'staff-changepw' staff_id %}" class="px-5 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600">เปลี่ยนรหัสผ่าน</a>
+    <a href="{% url 'staff-update' staff_id %}" class="px-5 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600">แก้ไขข้อมูล</a>
   </div>
   {% endif %}
-  {% comment %} <div class="flex items-center justify-end gap-3 pt-2">
-    <a href="{% url 'staff-update' staff_id %}" class="px-5 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600">Edit</a>
-  </div> {% endcomment %}
 </div>
 {% endblock %}
